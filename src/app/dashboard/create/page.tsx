@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
-import Image from 'next/image'
+import { jsPDF } from 'jspdf'
 
 const STYLES = [
   { id: 'sd', name: 'SD 귀여운', desc: '2등신 · 큰 머리 · 초귀여운', emoji: '🧸' },
@@ -28,6 +28,42 @@ export default function CreatePage() {
     if (file) {
       setPhoto(file)
       setPhotoPreview(URL.createObjectURL(file))
+    }
+  }
+
+  const downloadPDF = async (imageUrl: string, filename: string) => {
+    try {
+      const res = await fetch(imageUrl)
+      const blob = await res.blob()
+      const imgData = await new Promise<string>((resolve) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result as string)
+        reader.readAsDataURL(blob)
+      })
+
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+      const a4Width = 210
+      const a4Height = 297
+      
+      // 이미지를 A4에 맞게 배치 (여백 10mm)
+      const margin = 10
+      const maxW = a4Width - margin * 2
+      const maxH = a4Height - margin * 2
+
+      const img = new Image()
+      img.src = imgData
+      await new Promise((resolve) => { img.onload = resolve })
+
+      const ratio = Math.min(maxW / img.width, maxH / img.height)
+      const w = img.width * ratio
+      const h = img.height * ratio
+      const x = (a4Width - w) / 2
+      const y = (a4Height - h) / 2
+
+      pdf.addImage(imgData, 'PNG', x, y, w, h)
+      pdf.save(`${filename}.pdf`)
+    } catch {
+      alert('PDF 생성에 실패했습니다.')
     }
   }
 
@@ -60,10 +96,23 @@ export default function CreatePage() {
       })
       const data2 = await res2.json()
 
-      setResult({
+      const finalResult = {
         coloringUrl: data1.coloringUrl,
         colorUrl: res2.ok ? data2.colorUrl : null,
-      })
+      }
+      setResult(finalResult)
+
+      // 이력 저장
+      fetch('/api/generations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          features: features.trim(), style,
+          coloringUrl: finalResult.coloringUrl,
+          colorUrl: finalResult.colorUrl,
+        }),
+      }).catch(() => {}) // 저장 실패해도 무시
+
       setStep(3)
     } catch (err: any) {
       alert(err.message || '생성에 실패했습니다. 다시 시도해주세요.')
@@ -221,22 +270,36 @@ export default function CreatePage() {
             </div>
 
             {/* 다운로드 버튼 */}
-            <div className="flex gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <a
                 href={result.coloringUrl}
                 download="도안-컬러링북.png"
-                className="flex-1 py-4 text-center border-2 border-gray-800 text-gray-800 rounded-xl font-bold hover:bg-gray-50 transition"
+                className="py-4 text-center border-2 border-gray-800 text-gray-800 rounded-xl font-bold hover:bg-gray-50 transition"
               >
-                ✏️ 흑백 다운로드
+                ✏️ 흑백 PNG
               </a>
               {result.colorUrl && (
                 <a
                   href={result.colorUrl}
                   download="도안-컬러.png"
-                  className="flex-1 py-4 text-center bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-xl font-bold hover:shadow-lg transition"
+                  className="py-4 text-center bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-xl font-bold hover:shadow-lg transition"
                 >
-                  🎨 컬러 다운로드
+                  🎨 컬러 PNG
                 </a>
+              )}
+              <button
+                onClick={() => downloadPDF(result.coloringUrl, '도안-컬러링북')}
+                className="py-4 text-center border-2 border-gray-600 text-gray-600 rounded-xl font-bold hover:bg-gray-50 transition"
+              >
+                📄 흑백 PDF
+              </button>
+              {result.colorUrl && (
+                <button
+                  onClick={() => downloadPDF(result.colorUrl!, '도안-컬러')}
+                  className="py-4 text-center border-2 border-purple-500 text-purple-600 rounded-xl font-bold hover:bg-purple-50 transition"
+                >
+                  📄 컬러 PDF
+                </button>
               )}
             </div>
 
