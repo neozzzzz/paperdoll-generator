@@ -25,6 +25,9 @@ export default function Header() {
           ✂️ 도안공장
         </Link>
         <nav className="flex items-center gap-4">
+          <Link href="/gallery" className="text-gray-600 hover:text-pink-500 transition">
+            갤러리
+          </Link>
           {user ? (
             <>
               <Link href="/dashboard" className="text-gray-600 hover:text-pink-500 transition">
