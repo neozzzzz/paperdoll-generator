@@ -81,7 +81,7 @@ export async function POST(request: Request) {
 
     // Supabase Storage에 흑백 업로드
     const { error: uploadErr1 } = await supabase.storage
-      .from('generations')
+      .from('paperdoll')
       .upload(coloringPath, coloringBuffer, { contentType: 'image/png' })
 
     if (uploadErr1) throw uploadErr1
@@ -114,16 +114,16 @@ export async function POST(request: Request) {
       const colorPath = `${user.id}/${timestamp}-color.png`
       
       const { error: uploadErr2 } = await supabase.storage
-        .from('generations')
+        .from('paperdoll')
         .upload(colorPath, colorBuffer, { contentType: 'image/png' })
 
       if (!uploadErr2) {
-        const { data: colorData } = supabase.storage.from('generations').getPublicUrl(colorPath)
+        const { data: colorData } = supabase.storage.from('paperdoll').getPublicUrl(colorPath)
         colorUrl = colorData.publicUrl
       }
     }
 
-    const { data: coloringData } = supabase.storage.from('generations').getPublicUrl(coloringPath)
+    const { data: coloringData } = supabase.storage.from('paperdoll').getPublicUrl(coloringPath)
 
     return NextResponse.json({
       coloringUrl: coloringData.publicUrl,
