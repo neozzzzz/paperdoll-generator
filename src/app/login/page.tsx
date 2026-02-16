@@ -1,18 +1,29 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 
 export default function LoginPage() {
   const supabase = createClient()
+  const router = useRouter()
+
+  // 이미 로그인되어 있으면 대시보드로
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) router.push('/dashboard')
+    })
+  }, [])
 
   const handleGoogleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     })
+    if (error) console.error('Login error:', error)
   }
 
   return (

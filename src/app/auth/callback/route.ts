@@ -5,7 +5,15 @@ import { NextResponse } from 'next/server'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  const error = searchParams.get('error')
+  const errorDescription = searchParams.get('error_description')
   const next = searchParams.get('next') ?? '/dashboard'
+
+  // OAuth 에러 체크
+  if (error) {
+    console.error('OAuth error:', error, errorDescription)
+    return NextResponse.redirect(`${origin}/login?error=${error}&desc=${encodeURIComponent(errorDescription || '')}`)
+  }
 
   if (code) {
     const cookieStore = await cookies()
@@ -26,12 +34,19 @@ export async function GET(request: Request) {
       }
     )
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`)
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+    
+    if (exchangeError) {
+      console.error('Exchange error:', exchangeError.message)
+      return NextResponse.redirect(`${origin}/login?error=exchange&desc=${encodeURIComponent(exchangeError.message)}`)
     }
-    console.error('Auth error:', error)
+
+    console.log('Auth success, user:', data.user?.email)
+    
+    const redirectUrl = `${origin}${next}`
+    return NextResponse.redirect(redirectUrl)
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth`)
+  // code도 error도 없는 경우
+  return NextResponse.redirect(`${origin}/login?error=no_code`)
 }
