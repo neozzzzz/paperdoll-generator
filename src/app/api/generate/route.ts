@@ -34,6 +34,49 @@ ${colorInstruction}
 Korean labels under each outfit.`
 }
 
+async function generateImage(prompt: string, referenceImageBase64?: string): Promise<Buffer | null> {
+  try {
+    const contents: any[] = []
+    
+    if (referenceImageBase64) {
+      contents.push({
+        inlineData: {
+          mimeType: 'image/png',
+          data: referenceImageBase64,
+        }
+      })
+    }
+    contents.push({ text: prompt })
+
+    const response = await genai.models.generateContent({
+      model: 'gemini-3-pro-image-preview',
+      contents: [{ role: 'user', parts: contents }],
+      config: {
+        responseModalities: ['TEXT', 'IMAGE'],
+      } as any,
+    })
+
+    const parts = response.candidates?.[0]?.content?.parts
+    if (!parts) return null
+
+    for (const part of parts) {
+      if ((part as any).inlineData) {
+        const data = (part as any).inlineData.data
+        if (typeof data === 'string') {
+          return Buffer.from(data, 'base64')
+        }
+        if (data instanceof Uint8Array || Buffer.isBuffer(data)) {
+          return Buffer.from(data)
+        }
+      }
+    }
+    return null
+  } catch (err) {
+    console.error('Gemini error:', err)
+    return null
+  }
+}
+
 export async function POST(request: Request) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -58,28 +101,15 @@ export async function POST(request: Request) {
   try {
     // 1. 흑백 도안 생성
     const coloringPrompt = buildPrompt(features, style, true)
+    const coloringBuffer = await generateImage(coloringPrompt)
     
-    const coloringResult = await genai.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
-      contents: [{ role: 'user', parts: [{ text: coloringPrompt }] }],
-      config: {
-        responseModalities: ['image', 'text'],
-        responseMimeType: 'image/png',
-      },
-    })
-
-    const coloringPart = coloringResult.candidates?.[0]?.content?.parts?.find(
-      (p: any) => p.inlineData
-    )
-    if (!coloringPart?.inlineData) {
-      return NextResponse.json({ error: '도안 생성에 실패했습니다' }, { status: 500 })
+    if (!coloringBuffer) {
+      return NextResponse.json({ error: '도안 생성에 실패했습니다. 다시 시도해주세요.' }, { status: 500 })
     }
 
-    const coloringBuffer = Buffer.from(coloringPart.inlineData.data!, 'base64')
     const timestamp = Date.now()
     const coloringPath = `${user.id}/${timestamp}-coloring.png`
 
-    // Supabase Storage에 흑백 업로드
     const { error: uploadErr1 } = await supabase.storage
       .from('paperdoll')
       .upload(coloringPath, coloringBuffer, { contentType: 'image/png' })
@@ -87,32 +117,14 @@ export async function POST(request: Request) {
     if (uploadErr1) throw uploadErr1
 
     // 2. 컬러 버전 생성 (흑백을 참조)
-    const colorPrompt = `Take this exact black and white line art paper doll sheet and add beautiful full color. Keep EVERYTHING exactly the same - same layout, same poses, same outlines, same proportions. Just add vibrant colors appropriate for each outfit. Keep white background. Keep all dashed cutting lines. Identical layout to the line art.`
-
-    const colorResult = await genai.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
-      contents: [{
-        role: 'user',
-        parts: [
-          { inlineData: { mimeType: 'image/png', data: coloringPart.inlineData.data! } },
-          { text: colorPrompt },
-        ],
-      }],
-      config: {
-        responseModalities: ['image', 'text'],
-        responseMimeType: 'image/png',
-      },
-    })
-
-    const colorPart = colorResult.candidates?.[0]?.content?.parts?.find(
-      (p: any) => p.inlineData
-    )
+    const colorPrompt = `Take this exact black and white line art paper doll sheet and add beautiful full color. Keep EVERYTHING exactly the same - same layout, same poses, same outlines, same proportions. Just add vibrant colors appropriate for each outfit. Keep white background. Keep all dashed cutting lines.`
+    
+    const coloringBase64 = coloringBuffer.toString('base64')
+    const colorBuffer = await generateImage(colorPrompt, coloringBase64)
 
     let colorUrl = null
-    if (colorPart?.inlineData) {
-      const colorBuffer = Buffer.from(colorPart.inlineData.data!, 'base64')
+    if (colorBuffer) {
       const colorPath = `${user.id}/${timestamp}-color.png`
-      
       const { error: uploadErr2 } = await supabase.storage
         .from('paperdoll')
         .upload(colorPath, colorBuffer, { contentType: 'image/png' })
@@ -135,3 +147,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: err.message || '생성 중 오류가 발생했습니다' }, { status: 500 })
   }
 }
+
+export const maxDuration = 60
