@@ -25,6 +25,7 @@ export async function middleware(request: NextRequest) {
     }
   )
 
+  // 세션 갱신 (중요: getUser를 호출해야 쿠키가 갱신됨)
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
@@ -37,5 +38,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }
