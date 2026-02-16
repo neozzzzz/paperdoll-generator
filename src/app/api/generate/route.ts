@@ -35,46 +35,41 @@ Korean labels under each outfit.`
 }
 
 async function generateImage(prompt: string, referenceImageBase64?: string): Promise<Buffer | null> {
-  try {
-    const contents: any[] = []
-    
-    if (referenceImageBase64) {
-      contents.push({
-        inlineData: {
-          mimeType: 'image/png',
-          data: referenceImageBase64,
-        }
-      })
-    }
-    contents.push({ text: prompt })
-
-    const response = await genai.models.generateContent({
-      model: 'gemini-3-pro-image-preview',
-      contents: [{ role: 'user', parts: contents }],
-      config: {
-        responseModalities: ['TEXT', 'IMAGE'],
-      } as any,
+  const contents: any[] = []
+  
+  if (referenceImageBase64) {
+    contents.push({
+      inlineData: {
+        mimeType: 'image/png',
+        data: referenceImageBase64,
+      }
     })
+  }
+  contents.push({ text: prompt })
 
-    const parts = response.candidates?.[0]?.content?.parts
-    if (!parts) return null
+  const response = await genai.models.generateContent({
+    model: 'gemini-3-pro-image-preview',
+    contents: [{ role: 'user', parts: contents }],
+    config: {
+      responseModalities: ['TEXT', 'IMAGE'],
+    } as any,
+  })
 
-    for (const part of parts) {
-      if ((part as any).inlineData) {
-        const data = (part as any).inlineData.data
-        if (typeof data === 'string') {
-          return Buffer.from(data, 'base64')
-        }
-        if (data instanceof Uint8Array || Buffer.isBuffer(data)) {
-          return Buffer.from(data)
-        }
+  const parts = response.candidates?.[0]?.content?.parts
+  if (!parts) return null
+
+  for (const part of parts) {
+    if ((part as any).inlineData) {
+      const data = (part as any).inlineData.data
+      if (typeof data === 'string') {
+        return Buffer.from(data, 'base64')
+      }
+      if (data instanceof Uint8Array || Buffer.isBuffer(data)) {
+        return Buffer.from(data)
       }
     }
-    return null
-  } catch (err) {
-    console.error('Gemini error:', err)
-    return null
   }
+  return null
 }
 
 export async function POST(request: Request) {
@@ -94,54 +89,73 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 })
 
   const body = await request.json()
-  const { features, style = 'simple' } = body
+  const { features, style = 'simple', step = 'coloring' } = body
 
   if (!features) return NextResponse.json({ error: '캐릭터 특징을 입력해주세요' }, { status: 400 })
 
   try {
-    // 1. 흑백 도안 생성
-    const coloringPrompt = buildPrompt(features, style, true)
-    const coloringBuffer = await generateImage(coloringPrompt)
+    const timestamp = body.timestamp || Date.now()
+
+    if (step === 'coloring') {
+      // Step 1: 흑백 도안만 생성
+      const coloringPrompt = buildPrompt(features, style, true)
+      const coloringBuffer = await generateImage(coloringPrompt)
+      
+      if (!coloringBuffer) {
+        return NextResponse.json({ error: '도안 생성에 실패했습니다. 다시 시도해주세요.' }, { status: 500 })
+      }
+
+      const coloringPath = `${user.id}/${timestamp}-coloring.png`
+      const { error: uploadErr } = await supabase.storage
+        .from('paperdoll')
+        .upload(coloringPath, coloringBuffer, { contentType: 'image/png' })
+
+      if (uploadErr) throw uploadErr
+
+      const { data: coloringData } = supabase.storage.from('paperdoll').getPublicUrl(coloringPath)
+
+      return NextResponse.json({
+        step: 'coloring_done',
+        coloringUrl: coloringData.publicUrl,
+        timestamp,
+      })
+    } 
     
-    if (!coloringBuffer) {
-      return NextResponse.json({ error: '도안 생성에 실패했습니다. 다시 시도해주세요.' }, { status: 500 })
-    }
+    if (step === 'color') {
+      // Step 2: 컬러 버전 생성
+      const coloringUrl = body.coloringUrl
+      if (!coloringUrl) return NextResponse.json({ error: '흑백 도안 URL이 필요합니다' }, { status: 400 })
 
-    const timestamp = Date.now()
-    const coloringPath = `${user.id}/${timestamp}-coloring.png`
+      // 흑백 이미지 다운로드
+      const imgRes = await fetch(coloringUrl)
+      const imgBuf = Buffer.from(await imgRes.arrayBuffer())
+      const coloringBase64 = imgBuf.toString('base64')
 
-    const { error: uploadErr1 } = await supabase.storage
-      .from('paperdoll')
-      .upload(coloringPath, coloringBuffer, { contentType: 'image/png' })
+      const colorPrompt = `Take this exact black and white line art paper doll sheet and add beautiful full color. Keep EVERYTHING exactly the same - same layout, same poses, same outlines, same proportions. Just add vibrant colors appropriate for each outfit. Keep white background. Keep all dashed cutting lines.`
+      
+      const colorBuffer = await generateImage(colorPrompt, coloringBase64)
 
-    if (uploadErr1) throw uploadErr1
+      if (!colorBuffer) {
+        return NextResponse.json({ error: '컬러 버전 생성에 실패했습니다' }, { status: 500 })
+      }
 
-    // 2. 컬러 버전 생성 (흑백을 참조)
-    const colorPrompt = `Take this exact black and white line art paper doll sheet and add beautiful full color. Keep EVERYTHING exactly the same - same layout, same poses, same outlines, same proportions. Just add vibrant colors appropriate for each outfit. Keep white background. Keep all dashed cutting lines.`
-    
-    const coloringBase64 = coloringBuffer.toString('base64')
-    const colorBuffer = await generateImage(colorPrompt, coloringBase64)
-
-    let colorUrl = null
-    if (colorBuffer) {
       const colorPath = `${user.id}/${timestamp}-color.png`
-      const { error: uploadErr2 } = await supabase.storage
+      const { error: uploadErr } = await supabase.storage
         .from('paperdoll')
         .upload(colorPath, colorBuffer, { contentType: 'image/png' })
 
-      if (!uploadErr2) {
-        const { data: colorData } = supabase.storage.from('paperdoll').getPublicUrl(colorPath)
-        colorUrl = colorData.publicUrl
-      }
+      if (uploadErr) throw uploadErr
+
+      const { data: colorData } = supabase.storage.from('paperdoll').getPublicUrl(colorPath)
+
+      return NextResponse.json({
+        step: 'color_done',
+        colorUrl: colorData.publicUrl,
+        timestamp,
+      })
     }
 
-    const { data: coloringData } = supabase.storage.from('paperdoll').getPublicUrl(coloringPath)
-
-    return NextResponse.json({
-      coloringUrl: coloringData.publicUrl,
-      colorUrl,
-      timestamp,
-    })
+    return NextResponse.json({ error: '잘못된 step 값입니다' }, { status: 400 })
   } catch (err: any) {
     console.error('Generation error:', err)
     return NextResponse.json({ error: err.message || '생성 중 오류가 발생했습니다' }, { status: 500 })

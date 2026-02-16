@@ -35,19 +35,35 @@ export default function CreatePage() {
     if (!features.trim()) return alert('캐릭터 특징을 입력해주세요!')
     
     setLoading(true)
-    setProgress('🎨 AI가 도안을 그리고 있어요... (약 30초~1분)')
+    setProgress('✏️ 흑백 도안을 그리는 중... (약 20~30초)')
 
     try {
-      const res = await fetch('/api/generate', {
+      // Step 1: 흑백 도안
+      const res1 = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ features: features.trim(), style }),
+        body: JSON.stringify({ features: features.trim(), style, step: 'coloring' }),
       })
+      const data1 = await res1.json()
+      if (!res1.ok) throw new Error(data1.error)
 
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
+      setProgress('🎨 컬러 버전을 입히는 중... (약 20~30초)')
 
-      setResult(data)
+      // Step 2: 컬러 버전
+      const res2 = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          features: features.trim(), style, step: 'color',
+          coloringUrl: data1.coloringUrl, timestamp: data1.timestamp,
+        }),
+      })
+      const data2 = await res2.json()
+
+      setResult({
+        coloringUrl: data1.coloringUrl,
+        colorUrl: res2.ok ? data2.colorUrl : null,
+      })
       setStep(3)
     } catch (err: any) {
       alert(err.message || '생성에 실패했습니다. 다시 시도해주세요.')
