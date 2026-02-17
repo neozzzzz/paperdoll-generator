@@ -61,7 +61,7 @@ export default function Home() {
       <Header basePath="" />
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-pink-50 via-purple-50 to-white py-20 px-4">
+      <section className="relative overflow-hidden bg-gradient-to-b from-pink-50 via-purple-50 to-white py-12 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <div className="text-6xl mb-6">✂️🎨👗</div>
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
@@ -93,11 +93,33 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Styles */}
+      <section className="py-12 px-4 bg-white">
+        <div className="max-w-5xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-4">3가지 스타일</h2>
+          <p className="text-gray-500 mb-12">취향에 맞는 스타일을 골라보세요</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {styles.map((s) => (
+              <div key={s.name} className="bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div className="relative">
+                  <div className={`h-40 rounded-t-xl bg-gradient-to-br ${s.color}`} />
+                  <img src={s.image} alt={s.name} className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-5 h-48 object-contain drop-shadow-md" />
+                </div>
+                <div className="pt-7 px-5 pb-4">
+                <h3 className="font-bold text-lg">{s.name}</h3>
+                <p className="text-sm text-gray-500 mt-1">{s.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
-      <section id="features" className="py-20 px-4 bg-white">
+      <section id="features" className="py-12 px-4 bg-gradient-to-b from-white to-purple-50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-4">3단계로 완성!</h2>
-          <p className="text-center text-gray-500 mb-12">복잡한 건 AI가 다 해요</p>
+          <p className="text-center text-gray-500 mb-12">사진만 있으면 캐릭터 도안까지 쉽게 얻을 수 있어요</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {steps.map((item) => (
               <div key={item.title} className="bg-gradient-to-b from-pink-50 to-purple-50 rounded-3xl p-8 text-center hover:shadow-lg transition">
@@ -118,27 +140,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Styles */}
-      <section className="py-20 px-4 bg-gradient-to-b from-white to-purple-50">
-        <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">3가지 스타일</h2>
-          <p className="text-gray-500 mb-12">취향에 맞는 스타일을 골라보세요</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {styles.map((s) => (
-              <div key={s.name} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <div className={`h-40 rounded-xl bg-gradient-to-br ${s.color} mb-4 flex items-center justify-center overflow-hidden`}>
-                  <img src={s.image} alt={s.name} className="h-36 object-contain" />
-                </div>
-                <h3 className="font-bold text-lg">{s.name}</h3>
-                <p className="text-sm text-gray-500 mt-1">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Pricing */}
-      <section id="pricing" className="py-20 px-4 bg-white">
+      <section id="pricing" className="py-12 px-4 bg-white">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-4">요금제</h2>
           <p className="text-center text-gray-500 mb-12">부담 없이 시작하세요</p>
