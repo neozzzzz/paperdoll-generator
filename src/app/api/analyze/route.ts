@@ -30,44 +30,42 @@ export async function POST(request: Request) {
     const base64 = Buffer.from(bytes).toString('base64')
     const mimeType = photo.type || 'image/jpeg'
 
+    // Step 1: 특징 추출
     const response = await genai.models.generateContent({
       model: 'gemini-2.0-flash',
       contents: [{
         role: 'user',
         parts: [
-          {
-            inlineData: {
-              mimeType,
-              data: base64,
-            }
-          },
-          {
-            text: `이 사진에 있는 인물의 외형적 특징을 종이인형 도안 제작용으로 상세하게 설명해줘. 한국어로 답변.
+          { inlineData: { mimeType, data: base64 } },
+          { text: `이 사진의 인물을 종이인형 캐릭터로 만들기 위해 외형 특징을 추출해줘.
 
-다음 항목을 반드시 포함해서 한 문단으로 자연스럽게 서술해줘:
-- 성별과 추정 나이
-- 머리 스타일 (길이, 색상, 앞머리 유무, 직모/곱슬 등)
-- 얼굴형 (둥근/갸름한/각진 등)
-- 눈 크기와 특징
-- 안경 착용 여부 (있다면 형태와 색상)
-- 체형 (마른/보통/통통 등)
-- 기타 특징적인 액세서리 (목걸이, 헤어밴드, 귀걸이 등)
-
-예시 형식:
-"7살 정도의 한국 여자아이, 어깨 아래로 내려오는 긴 갈색 생머리, 앞머리 없이 자연스럽게 가르마를 탐, 갸름한 얼굴형, 큰 동그란 금색 와이어 안경, 마른 체형, 은색 작은 목걸이 착용"
-
-사진 속 인물의 특징만 서술하고, 배경이나 옷은 무시해줘. 개인을 식별하는 이름이나 신원 정보는 절대 포함하지 마.`
-          }
+반드시 아래 형식의 JSON으로만 답변해. 다른 텍스트 없이 JSON만:
+{
+  "gender": "여자/남자",
+  "age": "추정 나이 (예: 7살)",
+  "hair_style": "머리 스타일 상세 (길이, 색상, 직모/곱슬, 앞머리 등)",
+  "face_shape": "얼굴형",
+  "eyes": "눈 특징",
+  "glasses": "안경 정보 (없으면 null)",
+  "body_type": "체형",
+  "accessories": "액세서리 목록 (목걸이, 헤어밴드 등)",
+  "distinctive": "기타 특징적인 요소",
+  "summary": "종이인형 도안용 한 문단 요약 (한국어, 구체적)"
+}` }
         ],
       }],
     })
 
     const text = response.candidates?.[0]?.content?.parts?.[0]?.text
-    if (!text) {
-      return NextResponse.json({ error: '특징 분석에 실패했습니다' }, { status: 500 })
-    }
+    if (!text) return NextResponse.json({ error: '특징 분석에 실패했습니다' }, { status: 500 })
 
-    return NextResponse.json({ features: text.trim() })
+    // JSON 파싱
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) return NextResponse.json({ error: '분석 결과 파싱 실패' }, { status: 500 })
+
+    const features = JSON.parse(jsonMatch[0])
+
+    return NextResponse.json({ features, photoBase64: base64, photoMime: mimeType })
   } catch (err: any) {
     console.error('Analyze error:', err)
     return NextResponse.json({ error: err.message || '분석 중 오류가 발생했습니다' }, { status: 500 })
