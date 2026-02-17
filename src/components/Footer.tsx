@@ -1,4 +1,4 @@
-export default function Footer() {
+export default function Footer({ versionLabel }: { versionLabel?: string } = {}) {
   return (
     <footer className="bg-gray-50 border-t border-gray-100 mt-auto">
       <div className="max-w-6xl mx-auto px-4 py-12">

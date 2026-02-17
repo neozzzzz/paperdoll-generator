@@ -1,25 +1,39 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 import Link from 'next/link'
 
-export default async function DashboardPage() {
+type Generation = {
+  id: string
+  features: string
+  style: string
+  color_url: string | null
+  coloring_url: string
+  created_at: string
+}
+
+export default async function DashboardV1_1Page() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/login')
+  if (!user) {
+    redirect('/login')
+  }
 
   // 이력 조회
-  const { data: generations } = await supabase
+  const { data: rawGenerations } = await supabase
     .from('generations')
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(20)
 
+  const generations = (rawGenerations || []) as Generation[]
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <Header basePath="/" />
       <div className="max-w-5xl mx-auto px-4 py-10">
         {/* 인사 + 크레딧 */}
         <div className="bg-white rounded-2xl p-6 shadow-sm mb-8 flex items-center justify-between">
@@ -50,7 +64,7 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-bold mb-4">📋 내 도안 기록</h2>
           {generations && generations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {generations.map((gen: any) => (
+              {generations.map((gen) => (
                 <div key={gen.id} className="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition">
                   <div className="aspect-[3/4] relative bg-gray-50">
                     <img
@@ -90,6 +104,7 @@ export default async function DashboardPage() {
           )}
         </div>
       </div>
+      <Footer versionLabel="v1.1" />
     </div>
   )
 }

@@ -1,39 +1,25 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import Link from 'next/link'
 
-type Generation = {
-  id: string
-  features: string
-  style: string
-  color_url: string | null
-  coloring_url: string
-  created_at: string
-}
-
-export default async function DashboardV1_1Page() {
+export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/v1-1/login')
-  }
+  if (!user) redirect('/login')
 
   // 이력 조회
-  const { data: rawGenerations } = await supabase
+  const { data: generations } = await supabase
     .from('generations')
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(20)
 
-  const generations = (rawGenerations || []) as Generation[]
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header basePath="/v1-1" />
+      <Header />
       <div className="max-w-5xl mx-auto px-4 py-10">
         {/* 인사 + 크레딧 */}
         <div className="bg-white rounded-2xl p-6 shadow-sm mb-8 flex items-center justify-between">
@@ -51,7 +37,7 @@ export default async function DashboardV1_1Page() {
 
         {/* 새 도안 만들기 */}
         <Link
-          href="/v1-1/dashboard/create"
+          href="/dashboard/create"
           className="block bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl p-8 text-center text-white hover:shadow-xl hover:scale-[1.01] transition-all mb-8"
         >
           <div className="text-4xl mb-3">✨</div>
@@ -64,7 +50,7 @@ export default async function DashboardV1_1Page() {
           <h2 className="text-lg font-bold mb-4">📋 내 도안 기록</h2>
           {generations && generations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {generations.map((gen) => (
+              {generations.map((gen: any) => (
                 <div key={gen.id} className="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition">
                   <div className="aspect-[3/4] relative bg-gray-50">
                     <img
@@ -104,7 +90,6 @@ export default async function DashboardV1_1Page() {
           )}
         </div>
       </div>
-      <Footer versionLabel="v1.1" />
     </div>
   )
 }

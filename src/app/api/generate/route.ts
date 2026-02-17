@@ -83,32 +83,56 @@ Important: Keep the character's distinctive features accurate - ${features.hair_
     if (step === 'paperdoll') {
       const { style, characterBase64 } = body
 
-      const styleMap: Record<string, { name: string; ratio: string; desc: string }> = {
-        sd: { name: 'SD 귀여운', ratio: '2-head-tall', desc: 'super cute chibi/SD kawaii style, huge head, tiny round body, big sparkly eyes' },
-        simple: { name: '심플 일러스트', ratio: '4-head-tall', desc: 'simple cute illustration style, clean lines, adorable proportions' },
-        fashion: { name: '패션 일러스트', ratio: '6-head-tall', desc: 'realistic fashion illustration style, elegant proportions, detailed' },
+      const styleMap: Record<string, { name: string; ratio: string; desc: string; outfits: string }> = {
+        sd: {
+          name: 'SD 귀여운',
+          ratio: '2-head-tall',
+          desc: 'super cute chibi/SD kawaii style, 2-head-tall proportions (head = 50% of total height), huge round head, tiny stubby body, big sparkly detailed eyes with highlights, rosy cheeks, detailed hair with individual strands visible',
+          outfits: `1. 봄나들이 - floral print sundress with detailed flower patterns, matching sun hat with ribbon, cute mary-jane shoes with socks. Include hat as separate accessory piece.
+2. 발레리나 - detailed layered tutu with ruffles, fitted leotard with ribbon detail, ballet pointe shoes with criss-cross ribbons up the legs, hair bow/tiara. Include headpiece as separate accessory.
+3. 한복 - traditional Korean hanbok with detailed embroidery patterns on jeogori, flowing chima skirt with layered fabric folds, decorative norigae (hanging ornament), traditional shoes (kkotsin). Rich textile detail.
+4. 파자마 - cute star/moon pattern pajama set (button-up top + pants), fluffy bunny slippers with cute faces, sleep mask as accessory piece.`
+        },
+        simple: {
+          name: '심플 일러스트',
+          ratio: '4-head-tall',
+          desc: 'simple cute illustration style, 4-head-tall proportions, clean lines, adorable balanced proportions, expressive face',
+          outfits: `1. 캐주얼 - denim overall dress over striped t-shirt, canvas sneakers with star detail, small backpack accessory
+2. 공주님 - layered ball gown with sparkle details, puffy sleeves, tiara with gems, magic wand with star, glass slippers
+3. 한복 - traditional Korean hanbok, jeogori with embroidered trim, full chima with sash, traditional hair ornament (binyeo), flower shoes
+4. 탐험가 - safari vest with pockets, cargo shorts, hiking boots with laces, wide-brim adventure hat, binoculars accessory`
+        },
+        fashion: {
+          name: '패션 일러스트',
+          ratio: '6-head-tall',
+          desc: 'elegant fashion illustration style, 6-head-tall proportions, graceful poses, detailed fabric textures and draping',
+          outfits: `1. 캐주얼 - trendy cropped cardigan, pleated midi skirt, platform sneakers, crossbody bag accessory
+2. 공주님 - elegant A-line gown with lace overlay, off-shoulder design, delicate tiara, satin gloves, crystal shoes
+3. 한복 - modernized hanbok (생활한복), short jeogori with contemporary cut, flowing chima, traditional embroidery meets modern design, traditional hair pin
+4. 탐험가 - chic utility jacket, fitted cargo pants, lace-up boots, bucket hat, vintage camera accessory`
+        },
       }
 
       const s = styleMap[style] || styleMap.simple
 
-      const prompt = `Transform this character into a paper doll printable sheet.
+      const prompt = `Create a high-quality paper doll printable sheet. This should look like a professionally designed children's activity page.
 
-STYLE: ${s.desc}, ${s.ratio} proportions.
+STYLE: ${s.desc}
 
 Keep the character's face, hair, glasses, and distinctive features from the reference image but redraw in ${s.ratio} ${s.name} style.
 
-LAYOUT on pure white background, A4 vertical:
+LAYOUT on pure white background, A4 vertical format:
 
-TOP CENTER: The character in base outfit (white tank top + white shorts), standing front-facing, arms slightly out. Dashed cutting line around. About 15cm tall on A4.
+TOP CENTER: The character in base outfit (white tank top + white shorts), standing front-facing, arms slightly away from body. Dashed cutting line around the character. The character should be approximately 15cm tall on A4.
 
-BOTTOM: 4 outfit sets in 2x2 grid. EXACT same pose and size as character. To cut out and place ON TOP of doll. No folding tabs. Dashed cutting lines around each.
+BOTTOM: 4 detailed outfit sets arranged in 2x2 grid. Each outfit is designed to be cut out and placed ON TOP of the doll (overlay style, no folding tabs). Dashed cutting lines around each piece. Each outfit should include matching shoes/accessories as separate pieces where noted.
 
-1. 캐주얼 - cute casual dress with sneakers
-2. 공주님 - sparkly princess gown with tiara and wand
-3. 한복 - traditional Korean hanbok (jeogori + chima)
-4. 탐험가 - explorer outfit with vest, boots, adventure hat
+OUTFITS (with detailed accessories):
+${s.outfits}
 
-COLORING BOOK VERSION: Black line art outlines ONLY. NO color. NO shading. NO gray fill. Pure black lines on pure white background. Clean crisp lines for coloring. Korean labels under each outfit.`
+Korean label (한글) under each outfit name.
+
+COLORING BOOK VERSION: Black line art outlines ONLY. NO color, NO shading, NO gray fill, NO gradients. Pure crisp black lines on pure white background. Lines should be clean and detailed enough for coloring - include fabric pattern outlines, texture details, decorative elements all as line art. Professional coloring book quality.`
 
       const dollBuffer = await generateImage(prompt, characterBase64, 'image/png')
       if (!dollBuffer) return NextResponse.json({ error: '도안 생성 실패' }, { status: 500 })
@@ -130,15 +154,28 @@ COLORING BOOK VERSION: Black line art outlines ONLY. NO color. NO shading. NO gr
     if (step === 'color') {
       const { coloringBase64, style: styleId } = body
 
-      const prompt = `Take this exact black and white line art paper doll sheet and add beautiful full color. Keep EVERYTHING exactly the same - same layout, same poses, same outlines, same proportions, same positions. Just add vibrant beautiful colors appropriate for each outfit:
+      const colorGuides: Record<string, string> = {
+        sd: `- 봄나들이: pastel pink/yellow floral dress, straw hat with pink ribbon, white mary-jane shoes
+- 발레리나: soft pink/white tutu with sparkle, satin pink pointe shoes, silver tiara
+- 한복: vibrant cherry-red jeogori with gold embroidery, deep blue chima, colorful norigae, white kkotsin
+- 파자마: soft lavender/mint pajamas with yellow stars, white fluffy bunny slippers with pink ears`,
+        simple: `- 캐주얼: blue denim overall, red/white striped tee, white sneakers with gold star
+- 공주님: sparkly pink/magenta ball gown, silver tiara with blue gems, gold wand with star
+- 한복: coral pink jeogori with gold trim, indigo blue chima with sash, jade hair ornament
+- 탐험가: khaki/olive vest, tan shorts, brown hiking boots, forest green hat`,
+        fashion: `- 캐주얼: cream cardigan, dusty rose pleated skirt, white platform sneakers, tan crossbody bag
+- 공주님: soft champagne gold gown with white lace overlay, silver tiara, pearl white gloves, crystal shoes
+- 한복: modern sage green jeogori, dusty pink chima, gold embroidery accents, traditional jade pin
+- 탐험가: olive utility jacket, tan cargo pants, cognac brown boots, beige bucket hat, vintage brown camera`,
+      }
 
-- Character: natural skin tone, accurate hair color from the original
-- 캐주얼: bright cheerful colors
-- 공주님: sparkly pink/magenta gown, silver tiara, gold wand
-- 한복: traditional vibrant colors - pink/red jeogori, blue/indigo chima, gold embroidery
-- 탐험가: khaki/olive vest, brown boots, green hat
+      const prompt = `Take this exact black and white line art paper doll sheet and add beautiful, rich full color. Keep EVERYTHING exactly the same - same layout, same poses, same outlines, same proportions, same positions, same dashed cutting lines. 
 
-Keep white background. Keep all dashed cutting lines. Identical layout.`
+Color guide:
+- Character: warm natural skin tone, accurate hair color from the original design
+${colorGuides[styleId] || colorGuides.simple}
+
+Apply colors with depth - use subtle shading and highlights to make each outfit look vibrant and appealing. Fabric patterns (flowers, stars, embroidery) should be colored in detail. Keep white background. Keep all dashed cutting lines visible. Identical layout to the line art.`
 
       const colorBuffer = await generateImage(prompt, coloringBase64, 'image/png')
       if (!colorBuffer) return NextResponse.json({ error: '컬러 생성 실패' }, { status: 500 })

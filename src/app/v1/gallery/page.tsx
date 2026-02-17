@@ -1,7 +1,7 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
 
 import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
@@ -20,6 +20,10 @@ export default function GalleryPage() {
   const [filter, setFilter] = useState<string>('all')
   const [viewImage, setViewImage] = useState<string | null>(null)
 
+  useEffect(() => {
+    fetchGallery()
+  }, [])
+
   const fetchGallery = async () => {
     const res = await fetch('/api/gallery')
     if (res.ok) {
@@ -29,10 +33,6 @@ export default function GalleryPage() {
     setLoading(false)
   }
 
-  useEffect(() => {
-    fetchGallery()
-  }, [])
-
   const filtered = filter === 'all' ? generations : generations.filter(g => g.style === filter)
 
   const styleLabel = (s: string) => s === 'sd' ? 'SD 귀여운' : s === 'simple' ? '심플' : '패션'
@@ -40,7 +40,7 @@ export default function GalleryPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header basePath="/" />
+      <Header />
 
       <div className="max-w-6xl mx-auto px-4 py-10 flex-1">
         <div className="text-center mb-10">
@@ -130,7 +130,7 @@ export default function GalleryPage() {
         </div>
       )}
 
-      <Footer versionLabel="v1.1" />
+      <Footer />
     </div>
   )
 }

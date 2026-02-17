@@ -1,64 +1,11 @@
 import Link from 'next/link'
-import Image from 'next/image'
-
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
-const steps = [
-  {
-    icon: '/icons/paperdoll-feat-b1.png',
-    title: '1. 사진 업로드',
-    desc: '얼굴 사진이나 원하는 캐릭터 이미지를 올려주세요. 사진은 생성 후 즉시 삭제됩니다.',
-  },
-  {
-    icon: '/icons/paperdoll-feat-b2.png',
-    title: '2. 캐릭터 선택',
-    desc: 'AI가 3가지 스타일의 캐릭터와 테마별 옷을 만들어요. 컬러/흑백 선택 가능!',
-  },
-  {
-    icon: '/icons/paperdoll-feat-b3.png',
-    title: '3. 프린트 & 놀기',
-    desc: 'PDF로 다운받아 A4에 인쇄하세요. 오려서 올려놓으면 종이인형 완성!',
-  },
-]
-
-const styles = [
-  { name: 'SD 귀여운', desc: '2등신 · 큰 머리 · 아이들이 좋아하는 스타일', color: 'from-pink-400 to-rose-400' },
-  { name: '심플 일러스트', desc: '5등신 · 깔끔한 라인 · 누구나 좋아하는 스타일', color: 'from-purple-400 to-indigo-400' },
-  { name: '패션 일러스트', desc: '8등신 · 세밀한 디테일 · 어른도 즐기는 스타일', color: 'from-blue-400 to-cyan-400' },
-]
-
-const plans = [
-  {
-    name: '체험',
-    price: '무료',
-    sub: '',
-    features: ['캐릭터 1종', '옷 2벌', 'PDF 다운로드', '컬러 + 흑백'],
-    cta: '무료 체험',
-    highlight: false,
-  },
-  {
-    name: '기본',
-    price: '5,900원',
-    sub: '1회',
-    features: ['캐릭터 3종', '옷 각 5벌 (총 15벌)', 'PDF 다운로드', '컬러 + 흑백', '고해상도 출력'],
-    cta: '시작하기',
-    highlight: true,
-  },
-  {
-    name: '월정액',
-    price: '9,900원',
-    sub: '/월',
-    features: ['월 50회 생성', '캐릭터 3종', '옷 각 5벌', '우선 생성', '신규 테마 우선 제공'],
-    cta: '구독하기',
-    highlight: false,
-  },
-]
-
-export default function HomeV1_1() {
+export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header basePath="/v1-1" />
+      <Header />
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-pink-50 via-purple-50 to-white py-20 px-4">
@@ -76,16 +23,10 @@ export default function HomeV1_1() {
             <br />컬러 버전과 색칠놀이 버전, 원하는 대로 골라보세요!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/v1-1/login"
-              className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-2xl text-lg font-bold hover:shadow-xl hover:scale-105 transition-all"
-            >
+            <Link href="/login" className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-2xl text-lg font-bold hover:shadow-xl hover:scale-105 transition-all">
               무료로 시작하기 →
             </Link>
-            <a
-              href="#features"
-              className="px-8 py-4 bg-white text-gray-700 rounded-2xl text-lg font-medium border-2 border-pink-200 hover:border-pink-400 transition"
-            >
+            <a href="#features" className="px-8 py-4 bg-white text-gray-700 rounded-2xl text-lg font-medium border-2 border-pink-200 hover:border-pink-400 transition">
               어떻게 만드나요?
             </a>
           </div>
@@ -99,17 +40,25 @@ export default function HomeV1_1() {
           <h2 className="text-3xl font-bold text-center mb-4">3단계로 완성!</h2>
           <p className="text-center text-gray-500 mb-12">복잡한 건 AI가 다 해요</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {steps.map((item) => (
+            {[
+              {
+                emoji: '📸',
+                title: '1. 사진 업로드',
+                desc: '얼굴 사진이나 원하는 캐릭터 이미지를 올려주세요. 사진은 생성 후 즉시 삭제됩니다.',
+              },
+              {
+                emoji: '🤖',
+                title: '2. AI 도안 생성',
+                desc: 'AI가 3가지 스타일의 캐릭터와 테마별 옷을 만들어요. 컬러/흑백 선택 가능!',
+              },
+              {
+                emoji: '🖨️',
+                title: '3. 프린트 & 놀기',
+                desc: 'PDF로 다운받아 A4에 인쇄하세요. 오려서 올려놓으면 종이인형 완성!',
+              },
+            ].map((item) => (
               <div key={item.title} className="bg-gradient-to-b from-pink-50 to-purple-50 rounded-3xl p-8 text-center hover:shadow-lg transition">
-                <div className="mb-4 flex justify-center">
-                  <Image
-                    src={item.icon}
-                    alt={item.title}
-                    width={56}
-                    height={56}
-                    className="h-14 w-14 object-contain"
-                  />
-                </div>
+                <div className="text-5xl mb-4">{item.emoji}</div>
                 <h3 className="text-xl font-bold mb-2">{item.title}</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
               </div>
@@ -124,7 +73,11 @@ export default function HomeV1_1() {
           <h2 className="text-3xl font-bold mb-4">3가지 스타일</h2>
           <p className="text-gray-500 mb-12">취향에 맞는 스타일을 골라보세요</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {styles.map((s) => (
+            {[
+              { name: 'SD 귀여운', desc: '2등신 · 큰 머리 · 아이들이 좋아하는 스타일', color: 'from-pink-400 to-rose-400' },
+              { name: '심플 일러스트', desc: '5등신 · 깔끔한 라인 · 누구나 좋아하는 스타일', color: 'from-purple-400 to-indigo-400' },
+              { name: '패션 일러스트', desc: '8등신 · 세밀한 디테일 · 어른도 즐기는 스타일', color: 'from-blue-400 to-cyan-400' },
+            ].map((s) => (
               <div key={s.name} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <div className={`h-32 rounded-xl bg-gradient-to-br ${s.color} mb-4 flex items-center justify-center text-white text-4xl`}>
                   👧
@@ -143,7 +96,32 @@ export default function HomeV1_1() {
           <h2 className="text-3xl font-bold text-center mb-4">요금제</h2>
           <p className="text-center text-gray-500 mb-12">부담 없이 시작하세요</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {plans.map((plan) => (
+            {[
+              {
+                name: '체험',
+                price: '무료',
+                sub: '',
+                features: ['캐릭터 1종', '옷 2벌', 'PDF 다운로드', '컬러 + 흑백'],
+                cta: '무료 체험',
+                highlight: false,
+              },
+              {
+                name: '기본',
+                price: '5,900원',
+                sub: '1회',
+                features: ['캐릭터 3종', '옷 각 5벌 (총 15벌)', 'PDF 다운로드', '컬러 + 흑백', '고해상도 출력'],
+                cta: '시작하기',
+                highlight: true,
+              },
+              {
+                name: '월정액',
+                price: '9,900원',
+                sub: '/월',
+                features: ['월 50회 생성', '캐릭터 3종', '옷 각 5벌', '우선 생성', '신규 테마 우선 제공'],
+                cta: '구독하기',
+                highlight: false,
+              },
+            ].map((plan) => (
               <div
                 key={plan.name}
                 className={`rounded-3xl p-8 ${
@@ -165,7 +143,7 @@ export default function HomeV1_1() {
                   ))}
                 </ul>
                 <Link
-                  href="/v1-1/login"
+                  href="/login"
                   className={`block text-center py-3 rounded-xl font-medium transition ${
                     plan.highlight
                       ? 'bg-white text-purple-600 hover:bg-pink-50'
@@ -180,7 +158,7 @@ export default function HomeV1_1() {
         </div>
       </section>
 
-      <Footer versionLabel="v1.1" />
+      <Footer />
     </div>
   )
 }

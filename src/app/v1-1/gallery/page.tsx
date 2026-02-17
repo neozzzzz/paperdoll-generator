@@ -48,6 +48,7 @@ export default function GalleryPage() {
           <p className="text-gray-500">다른 사용자들이 만든 도안을 구경해보세요</p>
         </div>
 
+        {/* 필터 */}
         <div className="flex justify-center gap-2 mb-8">
           {[
             { id: 'all', label: '전체' },
@@ -111,6 +112,7 @@ export default function GalleryPage() {
         )}
       </div>
 
+      {/* 이미지 뷰어 모달 */}
       {viewImage && (
         <div
           className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"

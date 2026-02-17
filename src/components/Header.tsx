@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 
-export default function Header() {
+export default function Header({ basePath = '' }: { basePath?: string }) {
   const [user, setUser] = useState<User | null>(null)
   const supabase = createClient()
 
