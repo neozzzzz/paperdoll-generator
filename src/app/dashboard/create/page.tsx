@@ -23,11 +23,31 @@ export default function CreatePage() {
   const [viewMode, setViewMode] = useState<'coloring' | 'color'>('color')
   const router = useRouter()
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [analyzing, setAnalyzing] = useState(false)
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      setPhoto(file)
-      setPhotoPreview(URL.createObjectURL(file))
+    if (!file) return
+    
+    setPhoto(file)
+    setPhotoPreview(URL.createObjectURL(file))
+    
+    // 자동 특징 분석
+    setAnalyzing(true)
+    try {
+      const formData = new FormData()
+      formData.append('photo', file)
+      
+      const res = await fetch('/api/analyze', { method: 'POST', body: formData })
+      const data = await res.json()
+      
+      if (res.ok && data.features) {
+        setFeatures(data.features)
+      }
+    } catch {
+      // 분석 실패해도 수동 입력 가능
+    } finally {
+      setAnalyzing(false)
     }
   }
 
@@ -151,12 +171,24 @@ export default function CreatePage() {
               <div className="border-2 border-dashed border-pink-200 rounded-2xl p-6 text-center hover:border-pink-400 transition cursor-pointer"
                 onClick={() => document.getElementById('photo-input')?.click()}>
                 {photoPreview ? (
-                  <img src={photoPreview} alt="업로드된 사진" className="max-h-48 mx-auto rounded-lg" />
+                  <div>
+                    <img src={photoPreview} alt="업로드된 사진" className="max-h-48 mx-auto rounded-lg" />
+                    {analyzing && (
+                      <div className="mt-3 flex items-center justify-center gap-2 text-pink-500">
+                        <div className="animate-spin text-lg">🔍</div>
+                        <span className="text-sm font-medium">AI가 특징을 분석하는 중...</span>
+                      </div>
+                    )}
+                    {!analyzing && features && (
+                      <p className="mt-3 text-sm text-green-600">✅ 특징 자동 분석 완료!</p>
+                    )}
+                  </div>
                 ) : (
                   <>
                     <div className="text-4xl mb-2">📷</div>
-                    <p className="text-gray-500">사진을 올려주세요 (선택사항)</p>
-                    <p className="text-xs text-gray-400 mt-1">사진은 특징 분석 후 즉시 삭제됩니다</p>
+                    <p className="text-gray-500 font-medium">사진을 올려주세요</p>
+                    <p className="text-xs text-gray-400 mt-1">사진을 올리면 AI가 자동으로 특징을 분석합니다</p>
+                    <p className="text-xs text-gray-300 mt-1">사진은 분석 후 서버에 저장되지 않습니다</p>
                   </>
                 )}
                 <input id="photo-input" type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
@@ -165,14 +197,17 @@ export default function CreatePage() {
 
             {/* 캐릭터 특징 */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">캐릭터 특징 설명 *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                캐릭터 특징 {photo ? '(자동 분석됨 · 수정 가능)' : '직접 입력 *'}
+              </label>
               <textarea
                 value={features}
                 onChange={(e) => setFeatures(e.target.value)}
-                placeholder="예: 7살 여자아이, 긴 생머리, 동그란 안경, 갸름한 얼굴, 큰 눈, 목걸이"
+                placeholder="사진을 올리면 자동 입력됩니다. 또는 직접 입력: 7살 여자아이, 긴 생머리, 동그란 안경..."
                 className="w-full h-28 p-4 border-2 border-gray-200 rounded-xl focus:border-pink-400 focus:outline-none resize-none"
+                disabled={analyzing}
               />
-              <p className="text-xs text-gray-400 mt-1">머리 스타일, 안경, 체형 등 원하는 특징을 자유롭게 적어주세요</p>
+              <p className="text-xs text-gray-400 mt-1">자동 분석 결과를 수정하거나, 사진 없이 직접 입력해도 됩니다</p>
             </div>
 
             <button
