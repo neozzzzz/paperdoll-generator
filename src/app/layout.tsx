@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -12,11 +12,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export const metadata: Metadata = {
   title: "페이퍼돌리 - 사진으로 만드는 나만의 종이인형",
   description: "사진 한 장으로 세상에 하나뿐인 종이인형 도안을 만들어보세요. AI가 캐릭터와 옷을 자동으로 생성합니다.",
   keywords: "종이인형, 도안, 색칠공부, AI, 프린트",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   openGraph: {
     title: "페이퍼돌리 - 나만의 종이인형 만들기",
     description: "사진 한 장으로 AI가 종이인형 도안을 만들어드려요!",
