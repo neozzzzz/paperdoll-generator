@@ -30,6 +30,7 @@ export default function Home() {
               어떻게 만드나요?
             </a>
           </div>
+          <p className="mt-4 text-sm text-gray-400">첫 1회 무료 체험</p>
         </div>
       </section>
 
