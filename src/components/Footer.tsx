@@ -5,7 +5,7 @@ export default function Footer({ versionLabel }: { versionLabel?: string } = {})
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-lg font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent mb-3">
-              ✂️ 도안공장
+              🎀 페이퍼돌리
             </h3>
             <p className="text-sm text-gray-500">
               사진 한 장으로 나만의 종이인형을 만들어보세요.
@@ -30,7 +30,7 @@ export default function Footer({ versionLabel }: { versionLabel?: string } = {})
           </div>
         </div>
         <div className="mt-8 pt-8 border-t border-gray-200 text-center text-xs text-gray-400">
-          © 2026 도안공장. All rights reserved.
+          © 2026 페이퍼돌리. All rights reserved.
         </div>
       </div>
     </footer>

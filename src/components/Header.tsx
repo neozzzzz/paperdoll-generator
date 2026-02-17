@@ -22,7 +22,7 @@ export default function Header({ basePath = '' }: { basePath?: string }) {
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-pink-100">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
-          ✂️ 도안공장
+          🎀 페이퍼돌리
         </Link>
         <nav className="flex items-center gap-4">
           <Link href="/gallery" className="text-gray-600 hover:text-pink-500 transition">

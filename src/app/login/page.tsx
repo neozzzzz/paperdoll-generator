@@ -46,7 +46,7 @@ export default function LoginPageV1_1() {
       <div className="flex items-center justify-center px-4 py-20">
         <div className="bg-white rounded-3xl shadow-xl p-10 w-full max-w-md text-center">
           <div className="text-5xl mb-4">✂️</div>
-          <h1 className="text-2xl font-bold mb-2">도안공장에 오신 걸 환영해요!</h1>
+          <h1 className="text-2xl font-bold mb-2">페이퍼돌리에 오신 걸 환영해요!</h1>
           <p className="text-gray-500 mb-8">Google 계정으로 간편하게 시작하세요</p>
 
           <button
