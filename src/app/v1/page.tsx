@@ -10,11 +10,7 @@ export default function Home() {
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-pink-50 via-purple-50 to-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="flex justify-center gap-4 mb-6">
-            <img src="/icon-scissors.png" alt="가위" className="w-16 h-16 object-contain" />
-            <img src="/icon-palette.png" alt="팔레트" className="w-16 h-16 object-contain" />
-            <img src="/icon-dress.png" alt="드레스" className="w-16 h-16 object-contain" />
-          </div>
+          <div className="text-6xl mb-6">✂️🎨👗</div>
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
             <span className="bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
               사진 한 장으로
@@ -46,23 +42,23 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                icon: '/icon-scissors.png',
+                emoji: '📸',
                 title: '1. 사진 업로드',
                 desc: '얼굴 사진이나 원하는 캐릭터 이미지를 올려주세요. 사진은 생성 후 즉시 삭제됩니다.',
               },
               {
-                icon: '/icon-palette.png',
+                emoji: '🤖',
                 title: '2. AI 도안 생성',
                 desc: 'AI가 3가지 스타일의 캐릭터와 테마별 옷을 만들어요. 컬러/흑백 선택 가능!',
               },
               {
-                icon: '/icon-dress.png',
+                emoji: '🖨️',
                 title: '3. 프린트 & 놀기',
                 desc: 'PDF로 다운받아 A4에 인쇄하세요. 오려서 올려놓으면 종이인형 완성!',
               },
             ].map((item) => (
               <div key={item.title} className="bg-gradient-to-b from-pink-50 to-purple-50 rounded-3xl p-8 text-center hover:shadow-lg transition">
-                <img src={item.icon} alt={item.title} className="w-16 h-16 object-contain mx-auto mb-4" />
+                <div className="text-5xl mb-4">{item.emoji}</div>
                 <h3 className="text-xl font-bold mb-2">{item.title}</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
               </div>
