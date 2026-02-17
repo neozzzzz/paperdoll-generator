@@ -10,11 +10,7 @@ const nextConfig: NextConfig = {
     ],
   },
   typescript: {
-    // 빌드 속도 개선: Vercel에서 TypeScript 에러 무시
     ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
 };
 
