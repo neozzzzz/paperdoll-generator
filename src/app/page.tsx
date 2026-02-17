@@ -23,9 +23,9 @@ const steps = [
 ]
 
 const styles = [
-  { name: 'SD 귀여운', desc: '2등신 · 큰 머리 · 아이들이 좋아하는 스타일', color: 'from-pink-400 to-rose-400' },
-  { name: '심플 일러스트', desc: '5등신 · 깔끔한 라인 · 누구나 좋아하는 스타일', color: 'from-purple-400 to-indigo-400' },
-  { name: '패션 일러스트', desc: '8등신 · 세밀한 디테일 · 어른도 즐기는 스타일', color: 'from-blue-400 to-cyan-400' },
+  { name: 'SD 귀여운', desc: '2등신 · 큰 머리 · 아이들이 좋아하는 스타일', color: 'from-pink-400 to-rose-400', image: '/icons/style-sd.png' },
+  { name: '심플 일러스트', desc: '5등신 · 깔끔한 라인 · 누구나 좋아하는 스타일', color: 'from-purple-400 to-indigo-400', image: '/icons/style-simple.png' },
+  { name: '패션 일러스트', desc: '8등신 · 세밀한 디테일 · 어른도 즐기는 스타일', color: 'from-blue-400 to-cyan-400', image: '/icons/style-fashion.png' },
 ]
 
 const plans = [
@@ -126,8 +126,8 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {styles.map((s) => (
               <div key={s.name} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <div className={`h-32 rounded-xl bg-gradient-to-br ${s.color} mb-4 flex items-center justify-center text-white text-4xl`}>
-                  👧
+                <div className={`h-40 rounded-xl bg-gradient-to-br ${s.color} mb-4 flex items-center justify-center overflow-hidden`}>
+                  <img src={s.image} alt={s.name} className="h-36 object-contain" />
                 </div>
                 <h3 className="font-bold text-lg">{s.name}</h3>
                 <p className="text-sm text-gray-500 mt-1">{s.desc}</p>
