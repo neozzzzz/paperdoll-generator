@@ -42,7 +42,7 @@ export default function LoginPageV1_1() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-purple-50">
-      <Header basePath="/" />
+      <Header basePath="" />
       <div className="flex items-center justify-center px-4 py-20">
         <div className="bg-white rounded-3xl shadow-xl p-10 w-full max-w-md text-center">
           <div className="text-5xl mb-4">✂️</div>
@@ -78,7 +78,7 @@ export default function LoginPageV1_1() {
           </p>
         </div>
       </div>
-      <Footer versionLabel="v1.1" />
+      <Footer  />
     </div>
   )
 }

@@ -40,7 +40,7 @@ export default function GalleryPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header basePath="/" />
+      <Header basePath="" />
 
       <div className="max-w-6xl mx-auto px-4 py-10 flex-1">
         <div className="text-center mb-10">
@@ -130,7 +130,7 @@ export default function GalleryPage() {
         </div>
       )}
 
-      <Footer versionLabel="v1.1" />
+      <Footer  />
     </div>
   )
 }

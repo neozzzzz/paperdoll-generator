@@ -58,7 +58,7 @@ const plans = [
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header basePath="/" />
+      <Header basePath="" />
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-pink-50 via-purple-50 to-white py-20 px-4">
@@ -180,7 +180,7 @@ export default function Home() {
         </div>
       </section>
 
-      <Footer />
+      <Footer  />
     </div>
   )
 }

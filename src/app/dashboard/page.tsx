@@ -33,7 +33,7 @@ export default async function DashboardV1_1Page() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header basePath="/" />
+      <Header basePath="" />
       <div className="max-w-5xl mx-auto px-4 py-10">
         {/* 인사 + 크레딧 */}
         <div className="bg-white rounded-2xl p-6 shadow-sm mb-8 flex items-center justify-between">
@@ -104,7 +104,7 @@ export default async function DashboardV1_1Page() {
           )}
         </div>
       </div>
-      <Footer versionLabel="v1.1" />
+      <Footer  />
     </div>
   )
 }
