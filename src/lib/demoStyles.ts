@@ -16,6 +16,37 @@ export type StyleModule = {
   strictRules: string[]
   strictRulesKr: string[]   // 한글 규칙 (UI용)
   baseTemplate?: string
+  /** 고정 비율 — 절대 변경 불가. 프롬프트에 무조건 주입됨. */
+  readonly fixedProportion: Readonly<{
+    headPct: number   // 머리가 전체 높이의 몇 %
+    torsoPct: number  // 몸통(목~허리)이 전체 높이의 몇 %
+    legsPct: number   // 다리(허리~발끝)가 전체 높이의 몇 %
+    headCount: number // N등신
+  }>
+}
+
+/**
+ * 스타일별 고정 비율 상수 — 이 값은 어떤 경우에도 오버라이드 불가.
+ * 프롬프트 빌더가 이 값을 읽어 강제 주입한다.
+ */
+const FIXED_PROPORTIONS = Object.freeze({
+  '2.5head': Object.freeze({ headPct: 40, torsoPct: 24, legsPct: 36, headCount: 2.5 }),
+  '3head':   Object.freeze({ headPct: 33, torsoPct: 33, legsPct: 34, headCount: 3 }),
+  '4head':   Object.freeze({ headPct: 25, torsoPct: 25, legsPct: 50, headCount: 4 }),
+  '5head':   Object.freeze({ headPct: 20, torsoPct: 25, legsPct: 55, headCount: 5 }),
+} as const)
+
+/** 비율 상수를 프롬프트 텍스트로 변환 */
+function proportionPrompt(p: StyleModule['fixedProportion']): string {
+  return [
+    `BODY PROPORTION (${p.headCount}등신 — LOCKED, DO NOT DEVIATE):`,
+    `- Head height = EXACTLY ${p.headPct}% of total figure height.`,
+    `- Torso (chin to waist) = EXACTLY ${p.torsoPct}% of total figure height.`,
+    `- Legs (waist to feet) = EXACTLY ${p.legsPct}% of total figure height.`,
+    `- This is a ${p.headCount}-head-tall character. The head fits into total height ${p.headCount} times.`,
+    `- If the output does not match these percentages, it is WRONG. Re-draw until correct.`,
+    `- Feet MUST be visible at the bottom.`,
+  ].join('\n')
 }
 
 const SIMPLELINE_BASE = {
@@ -58,6 +89,7 @@ export const DEMO_STYLE_LIBRARY: Record<string, StyleModule> = {
     name: 'SD 귀여운',
     ratio: '3-head-tall',
     ratioDisplay: '약 3등신',
+    fixedProportion: FIXED_PROPORTIONS['3head'],
     desc: 'Chibi/SD paper-doll base derived from Simple Line frame',
     descKr: '심플라인 기반의 치비/SD 종이인형. 머리 비율만 확대, 몸체 실루엣은 유지.',
     tone: [
@@ -104,6 +136,7 @@ export const DEMO_STYLE_LIBRARY: Record<string, StyleModule> = {
     id: 'simple',
     name: '심플라인',
     ratio: SIMPLELINE_BASE.ratio,
+    fixedProportion: FIXED_PROPORTIONS['5head'],
     ratioDisplay: '4등신',
     desc: 'Simple Line — the base template all other styles derive from',
     descKr: '모든 스타일의 기준이 되는 베이스 템플릿. 안정적이고 정돈된 실루엣.',
@@ -148,6 +181,7 @@ export const DEMO_STYLE_LIBRARY: Record<string, StyleModule> = {
     id: 'fashion',
     name: '패션 일러스트',
     ratio: '5-head-tall',
+    fixedProportion: FIXED_PROPORTIONS['5head'],
     ratioDisplay: '5등신',
     desc: 'Fashion illustration upgrade from Simple Line with refined proportions',
     descKr: '심플라인에서 비율을 한 단계 키우고 의상 디테일(주름/봉제선/드레이프)을 보강한 패션 일러스트.',
@@ -194,6 +228,7 @@ export const DEMO_STYLE_LIBRARY: Record<string, StyleModule> = {
     id: 'pastel',
     name: '파스텔 드림',
     ratio: '3.5-head-tall',
+    fixedProportion: FIXED_PROPORTIONS['5head'],
     ratioDisplay: '3.5등신',
     desc: 'Dreamy pastel watercolor-feel illustration with soft-focus aesthetic',
     descKr: '수채화 느낌의 부드러운 파스텔톤. 선이 연하고 색 경계가 흐릿하며 몽환적인 분위기.',
@@ -246,6 +281,7 @@ export const DEMO_STYLE_LIBRARY: Record<string, StyleModule> = {
     id: 'inkline',
     name: '모노 라인',
     ratio: '4-head-tall',
+    fixedProportion: FIXED_PROPORTIONS['5head'],
     ratioDisplay: '4등신',
     desc: 'Monochrome ink illustration with line hierarchy and crosshatch shading',
     descKr: '잉크 펜 드로잉 느낌. 선 굵기에 위계가 있고, 크로스해칭으로 음영 표현. 색 최소화.',
@@ -293,6 +329,7 @@ export const DEMO_STYLE_LIBRARY: Record<string, StyleModule> = {
     id: 'pastelpixel',
     name: '픽셀 키키',
     ratio: '4-head-tall',
+    fixedProportion: FIXED_PROPORTIONS['4head'],
     ratioDisplay: '4등신',
     desc: 'Retro pixel-art inspired illustration with visible grid structure',
     descKr: '레트로 픽셀아트 감성. 눈에 보이는 픽셀 격자, 계단 현상(앨리어싱) 의도적 노출, 네온 악센트 컬러.',
@@ -345,6 +382,7 @@ export const DEMO_STYLE_LIBRARY: Record<string, StyleModule> = {
     id: 'noir',
     name: '네오 누아르',
     ratio: '5-head-tall',
+    fixedProportion: FIXED_PROPORTIONS['5head'],
     ratioDisplay: '5등신',
     desc: 'Neo-noir cinematic illustration with dramatic contrast and sharp silhouette',
     descKr: '영화적 누아르 무드. 강한 명암 대비, 날카로운 실루엣, 하드보일드 그림자 처리.',
@@ -397,6 +435,7 @@ export const DEMO_STYLE_LIBRARY: Record<string, StyleModule> = {
     id: 'kawaiimax',
     name: '케이퍼 키치',
     ratio: '2.2-head-tall',
+    fixedProportion: FIXED_PROPORTIONS['2.5head'],
     ratioDisplay: '2.2등신',
     desc: 'Ultra-kawaii chibi with maximum decoration and sticker-like rendering',
     descKr: '초극단 카와이 치비. 머리가 몸의 2배, 데코 요소 최대치, 스티커처럼 두꺼운 테두리.',
@@ -584,14 +623,15 @@ CRITICAL — PERSONAL FEATURES REPRODUCTION RULES:
 - These features MUST be consistent across ALL style variations — the character must be recognizable as the same person.
 
 STYLE: ${style.tone}
-TARGET PROPORTION: ${options.ratioOverride || style.ratio}
+
+${proportionPrompt(style.fixedProportion)}
 ${lineArtDirective}
 
 RULES:
 ${composeRules(style).map((r) => `- ${r}`).join('\n')}
 ${options.extraDetail ? `\nEXTRA CONSTRAINTS: ${options.extraDetail}` : ''}
 
-OUTPUT: Full-body character, front-facing, standing upright on pure white background, arms slightly away from body. Wearing simple white tank top and white shorts (base outfit for paper doll). Single character only.`
+OUTPUT: Full-body character, front-facing, standing upright on pure white background, arms slightly away from body. Wearing simple white tank top and white shorts (base outfit for paper doll). Single character only. Feet MUST be visible.`
 }
 
 export function buildPaperDollPrompt(
@@ -622,7 +662,8 @@ export function buildPaperDollPrompt(
   return `Create a high-quality paper doll printable sheet in A4 format.
 
 STYLE: ${style.tone}
-PROPORTION: ${options.ratioOverride || style.ratio}
+
+${proportionPrompt(style.fixedProportion)}
 
 ${FACE_REFERENCE_GUIDE}
 
@@ -659,6 +700,8 @@ export function buildColorPrompt(style: StyleModule, options: { colorPreset?: 's
   return `Take this exact black-and-white paper doll sheet and color it.
 
 Style reminder: ${style.tone}
+
+${proportionPrompt(style.fixedProportion)}
 
 Rules:
 - Keep character identity and all outlines exactly the same.
