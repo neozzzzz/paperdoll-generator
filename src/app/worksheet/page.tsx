@@ -71,8 +71,8 @@ export default function WorksheetPage() {
     <main className="min-h-screen bg-gradient-to-b from-yellow-50 to-orange-50">
       {/* 설정 패널 (인쇄 시 숨김) */}
       <div className="print:hidden max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-2">✏️ 더하기/빼기 결과값 범위</h1>
-        <p className="text-center text-gray-500 text-sm mb-8">결과값 범위를 설정하고 학습지를 생성하세요</p>
+        <h1 className="text-2xl font-bold text-center text-gray-800 mb-1">✏️ 더하기/빼기 결과값 범위</h1>
+        <p className="text-center text-gray-400 text-xs mb-8">결과값 범위를 설정하고 학습지를 생성하세요</p>
 
         {/* 연산 타입 */}
         <div className="mb-6">
@@ -98,7 +98,7 @@ export default function WorksheetPage() {
         {/* 더하기 결과값 범위 */}
         {(op === 'add' || op === 'mixed') && (
           <div className="mb-5 p-4 bg-white rounded-xl border border-orange-200">
-            <h3 className="text-sm font-bold text-orange-600 mb-3">➕ 더하기 결과값 범위</h3>
+            <h2 className="text-base font-bold text-orange-600 mb-3">➕ 더하기 결과값 범위</h2>
             <div className="flex items-center gap-3">
               <div className="flex-1">
                 <label className="block text-xs text-gray-500 mb-1">최소</label>
@@ -133,7 +133,7 @@ export default function WorksheetPage() {
         {/* 빼기 결과값 범위 */}
         {(op === 'sub' || op === 'mixed') && (
           <div className="mb-5 p-4 bg-white rounded-xl border border-blue-200">
-            <h3 className="text-sm font-bold text-blue-600 mb-3">➖ 빼기 결과값 범위</h3>
+            <h2 className="text-base font-bold text-blue-600 mb-3">➖ 빼기 결과값 범위</h2>
             <div className="flex items-center gap-3">
               <div className="flex-1">
                 <label className="block text-xs text-gray-500 mb-1">최소</label>
