@@ -30,6 +30,12 @@ async function generateImage(prompt: string, referenceBase64?: string, refMime?:
   return null
 }
 
+const SIMPLELINE_BASE = {
+  sizeRule: 'character about 15cm tall on A4, centered, front-facing',
+  poseRule: 'front-facing, arms slightly away, full body visible',
+  clothingRule: 'base outfit is white tank + white shorts for tracing',
+}
+
 // Step별 처리
 export async function POST(request: Request) {
   const cookieStore = await cookies()
@@ -60,7 +66,7 @@ Character: ${features.summary}
 
 Draw the character standing front-facing, arms slightly away from body, in a simple white tank top and white shorts. Full body visible from head to toe.
 
-Style: Clean cute illustration, simple colored, white background, no other elements. The character should look like a paper doll base - clear outlines, flat colors, friendly expression.
+Style: Clean cute illustration, clean line and shape separation, white background, no other elements. The character should look like a paper doll base - clear outlines, clear silhouette, friendly expression.
 
 Important: Keep the character's distinctive features accurate - ${features.hair_style}, ${features.face_shape}, ${features.glasses || 'no glasses'}, ${features.accessories || 'no accessories'}.`
 
@@ -86,30 +92,30 @@ Important: Keep the character's distinctive features accurate - ${features.hair_
       const styleMap: Record<string, { name: string; ratio: string; desc: string; outfits: string }> = {
         sd: {
           name: 'SD 귀여운',
-          ratio: '2-head-tall',
-          desc: 'super cute chibi/SD kawaii style, 2-head-tall proportions (head = 50% of total height), huge round head, tiny stubby body, big sparkly detailed eyes with highlights, rosy cheeks, detailed hair with individual strands visible',
-          outfits: `1. 봄나들이 - floral print sundress with detailed flower patterns, matching sun hat with ribbon, cute mary-jane shoes with socks. Include hat as separate accessory piece.
-2. 발레리나 - detailed layered tutu with ruffles, fitted leotard with ribbon detail, ballet pointe shoes with criss-cross ribbons up the legs, hair bow/tiara. Include headpiece as separate accessory.
-3. 한복 - traditional Korean hanbok with detailed embroidery patterns on jeogori, flowing chima skirt with layered fabric folds, decorative norigae (hanging ornament), traditional shoes (kkotsin). Rich textile detail.
-4. 파자마 - cute star/moon pattern pajama set (button-up top + pants), fluffy bunny slippers with cute faces, sleep mask as accessory piece.`
+          ratio: '3-head-tall',
+          desc: 'cute SD/kawaii style based on Simple Line proportions, slight head emphasis, bright eyes, soft outlines, print-first line structure',
+          outfits: `1. 봄나들이 - floral print sundress with clear flower patterns, matching sun hat with ribbon, cute mary-jane shoes with socks. Include hat as separate accessory piece.
+2. 발레리나 - layered tutu with gentle ruffles, fitted leotard, ballet pointe shoes, hair bow/tiara. Include headpiece as separate accessory.
+3. 한복 - traditional Korean hanbok with jeogori trim, flowing chima skirt folds, decorative norigae, traditional kkotsin.
+4. 파자마 - star/moon pattern pajama set (top + pants), fluffy bunny slippers, sleep mask as accessory piece.`,
         },
         simple: {
-          name: '심플 일러스트',
+          name: '심플라인',
           ratio: '4-head-tall',
-          desc: 'simple cute illustration style, 4-head-tall proportions, clean lines, adorable balanced proportions, expressive face',
+          desc: 'Simple Line base format. clean cute illustration, clear contour, balanced 4-head-tall proportions, face/hair features must stay very readable',
           outfits: `1. 캐주얼 - denim overall dress over striped t-shirt, canvas sneakers with star detail, small backpack accessory
-2. 공주님 - layered ball gown with sparkle details, puffy sleeves, tiara with gems, magic wand with star, glass slippers
+2. 공주님 - layered ball gown with sparkle details, puffy sleeves, tiara with gems, wand with star, glass slippers
 3. 한복 - traditional Korean hanbok, jeogori with embroidered trim, full chima with sash, traditional hair ornament (binyeo), flower shoes
-4. 탐험가 - safari vest with pockets, cargo shorts, hiking boots with laces, wide-brim adventure hat, binoculars accessory`
+4. 탐험가 - safari vest with pockets, cargo shorts, hiking boots with laces, wide-brim adventure hat, binoculars accessory`,
         },
         fashion: {
           name: '패션 일러스트',
-          ratio: '6-head-tall',
-          desc: 'elegant fashion illustration style, 6-head-tall proportions, graceful poses, detailed fabric textures and draping',
+          ratio: '5.5-head-tall',
+          desc: 'fashion illustration upgraded from Simple Line, slightly taller proportions, richer fabric drape, premium edge while preserving base pose',
           outfits: `1. 캐주얼 - trendy cropped cardigan, pleated midi skirt, platform sneakers, crossbody bag accessory
-2. 공주님 - elegant A-line gown with lace overlay, off-shoulder design, delicate tiara, satin gloves, crystal shoes
+2. 공주님 - elegant A-line gown with lace overlay, off-shoulder line, delicate tiara, satin gloves, crystal shoes
 3. 한복 - modernized hanbok (생활한복), short jeogori with contemporary cut, flowing chima, traditional embroidery meets modern design, traditional hair pin
-4. 탐험가 - chic utility jacket, fitted cargo pants, lace-up boots, bucket hat, vintage camera accessory`
+4. 탐험가 - chic utility jacket, fitted cargo pants, lace-up boots, bucket hat, vintage camera accessory`,
         },
       }
 
@@ -119,11 +125,12 @@ Important: Keep the character's distinctive features accurate - ${features.hair_
 
 STYLE: ${s.desc}
 
+Base format rule: ${SIMPLELINE_BASE.sizeRule}; ${SIMPLELINE_BASE.poseRule}; ${SIMPLELINE_BASE.clothingRule}.
 Keep the character's face, hair, glasses, and distinctive features from the reference image but redraw in ${s.ratio} ${s.name} style.
 
 LAYOUT on pure white background, A4 vertical format:
 
-TOP CENTER: The character in base outfit (white tank top + white shorts), standing front-facing, arms slightly away from body. Dashed cutting line around the character. The character should be approximately 15cm tall on A4.
+TOP CENTER: The character in base outfit, standing ${SIMPLELINE_BASE.poseRule}. Dashed cutting line around the character.
 
 BOTTOM: 4 detailed outfit sets arranged in 2x2 grid. Each outfit is designed to be cut out and placed ON TOP of the doll (overlay style, no folding tabs). Dashed cutting lines around each piece. Each outfit should include matching shoes/accessories as separate pieces where noted.
 
@@ -155,18 +162,9 @@ COLORING BOOK VERSION: Black line art outlines ONLY. NO color, NO shading, NO gr
       const { coloringBase64, style: styleId } = body
 
       const colorGuides: Record<string, string> = {
-        sd: `- 봄나들이: pastel pink/yellow floral dress, straw hat with pink ribbon, white mary-jane shoes
-- 발레리나: soft pink/white tutu with sparkle, satin pink pointe shoes, silver tiara
-- 한복: vibrant cherry-red jeogori with gold embroidery, deep blue chima, colorful norigae, white kkotsin
-- 파자마: soft lavender/mint pajamas with yellow stars, white fluffy bunny slippers with pink ears`,
-        simple: `- 캐주얼: blue denim overall, red/white striped tee, white sneakers with gold star
-- 공주님: sparkly pink/magenta ball gown, silver tiara with blue gems, gold wand with star
-- 한복: coral pink jeogori with gold trim, indigo blue chima with sash, jade hair ornament
-- 탐험가: khaki/olive vest, tan shorts, brown hiking boots, forest green hat`,
-        fashion: `- 캐주얼: cream cardigan, dusty rose pleated skirt, white platform sneakers, tan crossbody bag
-- 공주님: soft champagne gold gown with white lace overlay, silver tiara, pearl white gloves, crystal shoes
-- 한복: modern sage green jeogori, dusty pink chima, gold embroidery accents, traditional jade pin
-- 탐험가: olive utility jacket, tan cargo pants, cognac brown boots, beige bucket hat, vintage brown camera`,
+        sd: `- 봄나들이: pastel pink/yellow floral dress, straw hat with pink ribbon, white mary-jane shoes\n- 발레리나: soft pink/white tutu with sparkle, satin pink pointe shoes, silver tiara\n- 한복: warm cherry-red jeogori with gold embroidery, deep blue chima, colorful norigae, white kkotsin\n- 파자마: soft lavender/mint pajamas with yellow stars, white fluffy bunny slippers with pink ears`,
+        simple: `- 캐주얼: blue denim overall, red/white striped tee, white sneakers with gold star\n- 공주님: sparkly pink/magenta ball gown, silver tiara with blue gems, gold wand with star\n- 한복: coral pink jeogori with gold trim, indigo blue chima with sash, jade hair ornament\n- 탐험가: khaki/olive vest, tan shorts, brown hiking boots, forest green hat`,
+        fashion: `- 캐주얼: cream cardigan, dusty rose pleated skirt, white platform sneakers, tan crossbody bag\n- 공주님: soft champagne gold gown with white lace overlay, silver tiara, pearl white gloves, crystal shoes\n- 한복: modern sage green jeogori, dusty pink chima, gold embroidery accents, traditional jade pin\n- 탐험가: olive utility jacket, tan cargo pants, cognac brown boots, beige bucket hat, vintage brown camera`,
       }
 
       const prompt = `Take this exact black and white line art paper doll sheet and add beautiful, rich full color. Keep EVERYTHING exactly the same - same layout, same poses, same outlines, same proportions, same positions, same dashed cutting lines. 

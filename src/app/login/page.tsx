@@ -47,11 +47,11 @@ export default function LoginPageV1_1() {
         <div className="bg-white rounded-3xl shadow-xl p-10 w-full max-w-md text-center">
           <div className="text-5xl mb-4">✂️</div>
           <h1 className="text-2xl font-bold mb-2">페이퍼돌리에 오신 걸 환영해요!</h1>
-          <p className="text-gray-500 mb-8">Google 계정으로 간편하게 시작하세요</p>
+          <p className="text-gray-500 mb-8">3초면 시작! 로그인하고 바로 만들어보세요</p>
 
           <button
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-gray-200 rounded-2xl hover:border-pink-300 hover:shadow-md transition"
+            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-gray-200 rounded-2xl hover:border-pink-300 hover:shadow-md transition cursor-pointer"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -64,7 +64,7 @@ export default function LoginPageV1_1() {
 
           <button
             onClick={handleKakaoLogin}
-            className="w-full mt-3 flex items-center justify-center gap-3 px-6 py-4 bg-[#FEE500] border-2 border-[#FEE500] rounded-2xl hover:shadow-md transition"
+            className="w-full mt-3 flex items-center justify-center gap-3 px-6 py-4 bg-[#FEE500] border-2 border-[#FEE500] rounded-2xl hover:shadow-md transition cursor-pointer"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#000000" d="M12 3C6.477 3 2 6.463 2 10.691c0 2.726 1.8 5.117 4.508 6.47-.152.552-.978 3.553-1.01 3.764 0 0-.02.166.088.23.108.063.235.013.235.013.31-.044 3.588-2.35 4.158-2.752.648.094 1.318.143 2.002.143 5.523 0 10-3.463 10-7.691S17.523 3 12 3z" />

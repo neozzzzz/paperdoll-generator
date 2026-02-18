@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "npm run build && git add -A && git commit -m 'deploy: production build verified' && git push origin main"
   },
   "dependencies": {
     "@google/genai": "^1.41.0",
