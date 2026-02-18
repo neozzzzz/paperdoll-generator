@@ -105,6 +105,7 @@ export default function DemoPage() {
 
   // 튜닝 옵션
   const [selectedStyles, setSelectedStyles] = useState<string[]>(['simple', 'fashion', 'pastelpixel'])
+  const [previewTab, setPreviewTab] = useState<'lineart' | 'color'>('lineart')
   const [selectedOutputs, setSelectedOutputs] = useState<string[]>(['coloring'])
   const [selectedThemes, setSelectedThemes] = useState<string[]>(['casual'])
   const [ratioMode, setRatioMode] = useState<'auto' | 'custom'>('auto')
@@ -507,10 +508,32 @@ export default function DemoPage() {
               <h3 className="font-bold text-gray-700 mb-2">튜닝 옵션</h3>
               <div className="space-y-4">
                 <div>
-                  <div className="text-sm text-gray-500 mb-1">스타일</div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-sm text-gray-500">스타일</span>
+                    <div className="flex bg-gray-100 rounded-lg p-0.5 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setPreviewTab('lineart')}
+                        className={`px-3 py-1 rounded-md transition font-medium ${previewTab === 'lineart' ? 'bg-white shadow text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}
+                      >
+                        ✏️ 도안
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewTab('color')}
+                        className={`px-3 py-1 rounded-md transition font-medium ${previewTab === 'color' ? 'bg-white shadow text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}
+                      >
+                        🎨 컬러
+                      </button>
+                    </div>
+                  </div>
                   <div className="grid grid-cols-4 gap-2">
                     {STYLE_OPTIONS.map((s) => {
                       const checked = selectedStyles.includes(s.id)
+                      const imgId = s.id === 'kawaiiMax' ? 'kawaiimax' : s.id
+                      const imgSrc = previewTab === 'color'
+                        ? `/previews/color/preview-${imgId}.png`
+                        : `/previews/preview-${imgId}.png`
                       return (
                         <button
                           key={s.id}
@@ -522,7 +545,7 @@ export default function DemoPage() {
                         >
                           {checked && <span className="absolute top-1 right-1 text-purple-500 text-xs">✓</span>}
                           <img
-                            src={`/previews/preview-${s.id === 'kawaiiMax' ? 'kawaiimax' : s.id}.png`}
+                            src={imgSrc}
                             alt={s.name}
                             className="w-full aspect-[3/4] object-cover rounded-lg"
                           />
