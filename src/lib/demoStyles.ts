@@ -147,13 +147,13 @@ export const DEMO_STYLE_LIBRARY: Record<string, StyleModule> = {
   fashion: {
     id: 'fashion',
     name: '패션 일러스트',
-    ratio: '5.5-head-tall',
-    ratioDisplay: '5.5등신',
+    ratio: '5-head-tall',
+    ratioDisplay: '5등신',
     desc: 'Fashion illustration upgrade from Simple Line with refined proportions',
     descKr: '심플라인에서 비율을 한 단계 키우고 의상 디테일(주름/봉제선/드레이프)을 보강한 패션 일러스트.',
     tone: [
       'Elegant fashion illustration for paper doll, derived from Simple Line base.',
-      '5.5-head-tall proportion: elongated legs (+30% vs base), slim torso, graceful neck visible.',
+      '5-head-tall proportion: head 20%, torso 25%, legs 55%. Slim torso, graceful neck visible.',
       'FACE IS CRITICAL: The face must look ATTRACTIVE and AGE-APPROPRIATE. Reproduce the extracted face features faithfully.',
       'Do NOT distort the face for fashion effect — keep it cute/pretty and matching the original age.',
       'Eyes have fashion-illustration styling: slightly almond shape, defined brow arch, clean lash detail, but still friendly and appealing.',
