@@ -460,6 +460,7 @@ const FACE_REFERENCE_GUIDE = `FACE STYLE REFERENCE (MANDATORY for all styles):
 - Overall: The face must look CUTE and PRETTY — like a high-quality children's illustration doll. Friendly, approachable, appealing.
 - Hair framing: Bangs frame the forehead softly. Side hair flows past shoulders in gentle waves.
 - Expression: Default gentle smile, warm and inviting.
+- GLASSES: Do NOT add glasses unless the character description EXPLICITLY mentions glasses. The reference image has NO glasses. If the extracted features say glasses = "null" or "없음" or do not mention glasses, the character must NOT wear glasses.
 This face quality is the MINIMUM STANDARD. Every generated face must be at least this attractive.`
 
 // ─── Prompt builders ───
@@ -576,7 +577,7 @@ ${FACE_REFERENCE_GUIDE}
 
 CRITICAL — PERSONAL FEATURES REPRODUCTION RULES:
 - HAIR: Reproduce the EXACT hair length, style, color, and bangs described above. Short hair stays short. Long hair stays long. Curly stays curly. Do NOT default to generic long wavy hair.
-- GLASSES: If glasses are described, the character MUST wear glasses in that exact style (round/square/rimless/etc). If no glasses mentioned or "null", do NOT add glasses.
+- GLASSES (CRITICAL): If the description says glasses = "null", "없음", "unknown", or does NOT mention glasses → the character MUST NOT wear glasses. Do NOT invent glasses. Only add glasses if the description explicitly states a glasses style (e.g. "둥근 금테 안경").
 - FACE: Age, face shape, eye style, skin tone must match the description. A 7-year-old looks 7, not 15.
 - ACCESSORIES: Reproduce any mentioned accessories (earrings, hairpin, headband, etc.) faithfully.
 - The face must be PRETTY/CUTE following the face reference guide, but personal features (hair, glasses, accessories) always take priority over style defaults.

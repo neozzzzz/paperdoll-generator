@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { DEMO_STYLE_LIBRARY, THEME_OUTFITS, type StyleModule } from '@/lib/demoStyles'
 import { jsPDF } from 'jspdf'
 
@@ -100,12 +100,23 @@ export default function DemoPage() {
   const [featuresText, setFeaturesText] = useState('')
   const [analyzing, setAnalyzing] = useState(false)
   const [results, setResults] = useState<Record<string, DemoResult>>({})
+  const resultsRef = React.useRef<Record<string, DemoResult>>({})
+  const updateResults = (updater: (prev: Record<string, DemoResult>) => Record<string, DemoResult>) => {
+    updateResults((prev) => {
+      const next = updater(prev)
+      resultsRef.current = next
+      return next
+    })
+  }
   const [generating, setGenerating] = useState(false)
   const [progress, setProgress] = useState('')
 
   // 튜닝 옵션
   const [selectedStyles, setSelectedStyles] = useState<string[]>(['simple', 'fashion', 'pastelpixel'])
   const [previewTab, setPreviewTab] = useState<'lineart' | 'color'>('lineart')
+  const [showHistory, setShowHistory] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [history, setHistory] = useState<any[]>([])
   const [selectedOutputs, setSelectedOutputs] = useState<string[]>(['coloring'])
   const [selectedThemes, setSelectedThemes] = useState<string[]>(['casual'])
   const [ratioMode, setRatioMode] = useState<'auto' | 'custom'>('auto')
@@ -250,6 +261,12 @@ export default function DemoPage() {
     return () => document.removeEventListener('paste', onPaste)
   }, [])
 
+  useEffect(() => {
+    try {
+      setHistory(JSON.parse(localStorage.getItem('paperdolly-history') || '[]'))
+    } catch { /* ignore */ }
+  }, [showHistory])
+
   const runSingleStyle = async (styleId: string) => {
     const style = DEMO_STYLE_LIBRARY[styleId] || STYLE_OPTIONS[0]
     const needCharacter = wantCharacter || wantColoring || wantColor // 캐릭터는 도안/컬러의 전제
@@ -278,7 +295,7 @@ export default function DemoPage() {
       characterBase64 = charData.characterBase64
 
       if (wantCharacter) {
-        setResults((prev) => ({
+        updateResults((prev) => ({
           ...prev,
           [style.id]: {
             ...prev[style.id],
@@ -311,7 +328,7 @@ export default function DemoPage() {
       coloringBase64 = dollData.coloringBase64
 
       if (wantColoring) {
-        setResults((prev) => ({
+        updateResults((prev) => ({
           ...prev,
           [style.id]: {
             ...prev[style.id],
@@ -340,7 +357,7 @@ export default function DemoPage() {
       const colorData = (await colorRes.json()) as GenerateColorResponse
       if (!colorRes.ok) throw new Error(colorData.error || `${style.name} 컬러 생성 실패`)
 
-      setResults((prev) => ({
+      updateResults((prev) => ({
         ...prev,
         [style.id]: {
           ...prev[style.id],
@@ -351,7 +368,7 @@ export default function DemoPage() {
     }
 
     // 초기 결과 없으면 빈 슬롯이라도 넣어줘야 탭이 보임
-    setResults((prev) => ({
+    updateResults((prev) => ({
       ...prev,
       [style.id]: prev[style.id] || { characterImageUrl: '' },
     }))
@@ -373,12 +390,34 @@ export default function DemoPage() {
 
     setGenerating(true)
     setStep(2)
-    setResults({})
+    updateResults(() => ({}))
 
     try {
       for (const styleId of selectedStyles) {
         await runSingleStyle(styleId)
       }
+      // 히스토리에 저장
+      try {
+        const historyEntry = {
+          id: Date.now().toString(),
+          date: new Date().toISOString(),
+          featuresText: featuresText.substring(0, 200),
+          styles: selectedStyles,
+          outputs: selectedOutputs,
+          themes: selectedThemes,
+          results: Object.fromEntries(
+            Object.entries(resultsRef.current).map(([k, v]) => [k, {
+              characterImageUrl: (v as Record<string, string>)?.characterImageUrl || '',
+              coloringImageUrl: (v as Record<string, string>)?.coloringImageUrl || '',
+              colorImageUrl: (v as Record<string, string>)?.colorImageUrl || '',
+            }])
+          ),
+        }
+        const prev = JSON.parse(localStorage.getItem('paperdolly-history') || '[]')
+        prev.unshift(historyEntry)
+        localStorage.setItem('paperdolly-history', JSON.stringify(prev.slice(0, 50)))
+      } catch { /* localStorage full or unavailable */ }
+
       setStep(3)
       setActiveStyle(selectedStyles[0] || 'sd')
     } catch (err: unknown) {
@@ -837,6 +876,85 @@ export default function DemoPage() {
           </section>
         </div>
       </div>
+
+      {/* 히스토리 토글 버튼 */}
+      <div className="mt-6 text-center">
+        <button
+          type="button"
+          onClick={() => setShowHistory(!showHistory)}
+          className="text-sm text-purple-600 hover:text-purple-800 underline"
+        >
+          {showHistory ? '히스토리 닫기' : `📋 생성 히스토리 보기`}
+        </button>
+      </div>
+
+      {/* 히스토리 패널 */}
+      {showHistory && (
+        <div className="mt-4 space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="font-bold text-gray-700">생성 히스토리 (최근 50건)</h3>
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm('전체 히스토리를 삭제하시겠습니까?')) {
+                  localStorage.removeItem('paperdolly-history')
+                  setHistory([])
+                }
+              }}
+              className="text-xs text-red-500 hover:text-red-700"
+            >
+              전체 삭제
+            </button>
+          </div>
+          {history.length === 0 && (
+            <p className="text-sm text-gray-400 text-center py-4">아직 생성 기록이 없습니다.</p>
+          )}
+          {history.map((h: { id: string; date: string; featuresText: string; styles: string[]; outputs: string[]; themes: string[]; results: Record<string, { characterImageUrl?: string; coloringImageUrl?: string; colorImageUrl?: string }> }) => (
+            <div key={h.id} className="border rounded-xl p-4 bg-white">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="text-xs text-gray-400">
+                    {new Date(h.date).toLocaleString('ko-KR')}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    스타일: {h.styles?.join(', ')} | 출력: {h.outputs?.join(', ')} | 테마: {h.themes?.join(', ')}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const updated = history.filter((x: { id: string }) => x.id !== h.id)
+                    localStorage.setItem('paperdolly-history', JSON.stringify(updated))
+                    setHistory(updated)
+                  }}
+                  className="text-xs text-gray-400 hover:text-red-500"
+                >
+                  삭제
+                </button>
+              </div>
+              <p className="text-xs text-gray-600 mb-2 line-clamp-2">{h.featuresText}</p>
+              <div className="flex gap-2 overflow-x-auto">
+                {h.results && Object.entries(h.results).map(([styleId, r]) => (
+                  <div key={styleId} className="flex-shrink-0">
+                    <p className="text-[10px] text-gray-400 text-center mb-1">{styleId}</p>
+                    <div className="flex gap-1">
+                      {r?.characterImageUrl && (
+                        <img src={r.characterImageUrl} alt="캐릭터" className="w-16 h-20 object-cover rounded border" />
+                      )}
+                      {r?.coloringImageUrl && (
+                        <img src={r.coloringImageUrl} alt="도안" className="w-16 h-20 object-cover rounded border" />
+                      )}
+                      {r?.colorImageUrl && (
+                        <img src={r.colorImageUrl} alt="컬러" className="w-16 h-20 object-cover rounded border" />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </main>
   )
 }
