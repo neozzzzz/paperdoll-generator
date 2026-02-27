@@ -23,7 +23,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: '로그인 필요' }, { status: 401 })
 
   const { data, error } = await supabase
-    .from('generations')
+    .from('paperdolly_generations')
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   const { features, style, coloringUrl, colorUrl } = body
 
   const { data, error } = await supabase
-    .from('generations')
+    .from('paperdolly_generations')
     .insert({
       user_id: user.id,
       features,

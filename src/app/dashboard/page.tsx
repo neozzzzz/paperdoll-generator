@@ -23,7 +23,7 @@ export default async function DashboardV1_1Page() {
 
   // 이력 조회
   const { data: rawGenerations } = await supabase
-    .from('generations')
+    .from('paperdolly_generations')
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })

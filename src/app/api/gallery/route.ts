@@ -17,7 +17,7 @@ export async function GET() {
   )
 
   const { data, error } = await supabase
-    .from('generations')
+    .from('paperdolly_generations')
     .select('id, features, style, coloring_url, color_url, created_at')
     .order('created_at', { ascending: false })
     .limit(50)

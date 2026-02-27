@@ -74,8 +74,8 @@ Important: Keep the character's distinctive features accurate - ${features.hair_
       if (!charBuffer) return NextResponse.json({ error: '캐릭터 생성 실패' }, { status: 500 })
 
       const charPath = `${user.id}/${timestamp}-character.png`
-      await supabase.storage.from('paperdoll').upload(charPath, charBuffer, { contentType: 'image/png' })
-      const { data: charData } = supabase.storage.from('paperdoll').getPublicUrl(charPath)
+      await supabase.storage.from('paperdolly_images').upload(charPath, charBuffer, { contentType: 'image/png' })
+      const { data: charData } = supabase.storage.from('paperdolly_images').getPublicUrl(charPath)
 
       return NextResponse.json({
         step: 'character_done',
@@ -145,8 +145,8 @@ COLORING BOOK VERSION: Black line art outlines ONLY. NO color, NO shading, NO gr
       if (!dollBuffer) return NextResponse.json({ error: '도안 생성 실패' }, { status: 500 })
 
       const dollPath = `${user.id}/${timestamp}-${style}-coloring.png`
-      await supabase.storage.from('paperdoll').upload(dollPath, dollBuffer, { contentType: 'image/png' })
-      const { data: dollData } = supabase.storage.from('paperdoll').getPublicUrl(dollPath)
+      await supabase.storage.from('paperdolly_images').upload(dollPath, dollBuffer, { contentType: 'image/png' })
+      const { data: dollData } = supabase.storage.from('paperdolly_images').getPublicUrl(dollPath)
 
       return NextResponse.json({
         step: 'paperdoll_done',
@@ -179,8 +179,8 @@ Apply colors with depth - use subtle shading and highlights to make each outfit 
       if (!colorBuffer) return NextResponse.json({ error: '컬러 생성 실패' }, { status: 500 })
 
       const colorPath = `${user.id}/${timestamp}-${styleId}-color.png`
-      await supabase.storage.from('paperdoll').upload(colorPath, colorBuffer, { contentType: 'image/png' })
-      const { data: colorData } = supabase.storage.from('paperdoll').getPublicUrl(colorPath)
+      await supabase.storage.from('paperdolly_images').upload(colorPath, colorBuffer, { contentType: 'image/png' })
+      const { data: colorData } = supabase.storage.from('paperdolly_images').getPublicUrl(colorPath)
 
       return NextResponse.json({
         step: 'color_done',
