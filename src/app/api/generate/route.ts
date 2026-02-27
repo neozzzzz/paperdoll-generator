@@ -1,7 +1,14 @@
 import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { GoogleGenAI } from '@google/genai'
 import { NextResponse } from 'next/server'
+
+// Storage 업로드용 admin 클라이언트 (service_role)
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
 
@@ -74,8 +81,8 @@ Important: Keep the character's distinctive features accurate - ${features.hair_
       if (!charBuffer) return NextResponse.json({ error: '캐릭터 생성 실패' }, { status: 500 })
 
       const charPath = `${user.id}/${timestamp}-character.png`
-      await supabase.storage.from('paperdolly_images').upload(charPath, charBuffer, { contentType: 'image/png' })
-      const { data: charData } = supabase.storage.from('paperdolly_images').getPublicUrl(charPath)
+      await supabaseAdmin.storage.from('paperdolly_images').upload(charPath, charBuffer, { contentType: 'image/png' })
+      const { data: charData } = supabaseAdmin.storage.from('paperdolly_images').getPublicUrl(charPath)
 
       return NextResponse.json({
         step: 'character_done',
@@ -145,8 +152,8 @@ COLORING BOOK VERSION: Black line art outlines ONLY. NO color, NO shading, NO gr
       if (!dollBuffer) return NextResponse.json({ error: '도안 생성 실패' }, { status: 500 })
 
       const dollPath = `${user.id}/${timestamp}-${style}-coloring.png`
-      await supabase.storage.from('paperdolly_images').upload(dollPath, dollBuffer, { contentType: 'image/png' })
-      const { data: dollData } = supabase.storage.from('paperdolly_images').getPublicUrl(dollPath)
+      await supabaseAdmin.storage.from('paperdolly_images').upload(dollPath, dollBuffer, { contentType: 'image/png' })
+      const { data: dollData } = supabaseAdmin.storage.from('paperdolly_images').getPublicUrl(dollPath)
 
       return NextResponse.json({
         step: 'paperdoll_done',
@@ -179,8 +186,8 @@ Apply colors with depth - use subtle shading and highlights to make each outfit 
       if (!colorBuffer) return NextResponse.json({ error: '컬러 생성 실패' }, { status: 500 })
 
       const colorPath = `${user.id}/${timestamp}-${styleId}-color.png`
-      await supabase.storage.from('paperdolly_images').upload(colorPath, colorBuffer, { contentType: 'image/png' })
-      const { data: colorData } = supabase.storage.from('paperdolly_images').getPublicUrl(colorPath)
+      await supabaseAdmin.storage.from('paperdolly_images').upload(colorPath, colorBuffer, { contentType: 'image/png' })
+      const { data: colorData } = supabaseAdmin.storage.from('paperdolly_images').getPublicUrl(colorPath)
 
       return NextResponse.json({
         step: 'color_done',
