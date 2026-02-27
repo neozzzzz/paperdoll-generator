@@ -3,7 +3,16 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
+  const url = new URL(request.url)
+  const searchParams = url.searchParams
+  
+  // X-Forwarded-Host가 있으면 실제 클라이언트 origin 사용
+  const forwardedHost = request.headers.get('x-forwarded-host')
+  const forwardedProto = request.headers.get('x-forwarded-proto') ?? 'http'
+  const origin = forwardedHost 
+    ? `${forwardedProto}://${forwardedHost}` 
+    : url.origin
+
   const code = searchParams.get('code')
   const error = searchParams.get('error')
   const errorDescription = searchParams.get('error_description')
