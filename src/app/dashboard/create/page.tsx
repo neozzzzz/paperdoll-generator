@@ -612,17 +612,26 @@ export default function CreatePage() {
                 </button>
                 <button onClick={async () => {
                     const url = viewMode === 'color' && activeResult.colorUrl ? activeResult.colorUrl : activeResult.coloringUrl
-                    if (navigator.share) {
-                      try {
-                        const res = await fetch(url)
-                        const blob = await res.blob()
-                        const file = new File([blob], `도안.png`, { type: 'image/png' })
+                    try {
+                      const res = await fetch(url)
+                      const blob = await res.blob()
+                      const file = new File([blob], '도안.png', { type: 'image/png' })
+                      if (navigator.share && navigator.canShare?.({ files: [file] })) {
                         await navigator.share({ title: '페이퍼돌리 도안', text: '내가 만든 종이인형 도안이야!', files: [file] })
-                      } catch { /* cancelled */ }
-                    } else {
-                      await navigator.clipboard.writeText(window.location.href)
-                      alert('링크가 복사됐어요! 📋')
-                    }
+                      } else if (navigator.share) {
+                        await navigator.share({ title: '페이퍼돌리 도안', text: '내가 만든 종이인형 도안이야!', url: window.location.href })
+                      } else if (navigator.clipboard) {
+                        await navigator.clipboard.writeText(window.location.href)
+                        alert('링크가 복사됐어요! 📋')
+                      } else {
+                        // blob URL 다운로드 fallback
+                        const blobUrl = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = blobUrl; a.download = '도안.png'
+                        document.body.appendChild(a); a.click()
+                        document.body.removeChild(a); URL.revokeObjectURL(blobUrl)
+                      }
+                    } catch { /* user cancelled or error */ }
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition">
                   <span className="text-xl">📤</span>
